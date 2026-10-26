@@ -1,5 +1,8 @@
-
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+/* =========================================================
+   1. Global styles and design tokens
+   ========================================================= */
 
 :root {
   font-family: "DM Sans", sans-serif;
@@ -11,16 +14,36 @@
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
   font-weight: 400;
+
+  --color-primary: #635bdb;
+  --color-primary-hover: #5148c5;
+  --color-text: #202b3c;
+  --color-muted: #65748b;
+  --color-border: #e3e8f1;
+  --color-surface: #ffffff;
+  --color-page: #f5f7fb;
+  --radius-card: 16px;
+  --shadow-card: 0 6px 24px rgb(23 37 60 / 5%);
+  --transition-fast: 180ms ease;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 20px;
+}
+
 body {
-  margin: 0;
-  min-width: 360px;
+  min-width: 320px;
   min-height: 100vh;
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-text);
 }
 
 button,
@@ -31,20 +54,53 @@ select {
 
 button {
   cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgb(99 91 219 / 35%);
+  outline-offset: 3px;
+}
+
+p,
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  color: #202b3c;
+  font-family: "Manrope", sans-serif;
 }
 
 .app-shell {
   min-height: 100vh;
 }
 
+/* =========================================================
+   2. Sidebar and navigation
+   ========================================================= */
+
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 2;
-  width: 245px;
-  padding: 28px 18px;
   display: flex;
   flex-direction: column;
+  width: 245px;
+  padding: 28px 18px;
+  border-right: 1px solid rgb(255 255 255 / 5%);
   background: #17253c;
   color: #dbe4f3;
 }
@@ -60,12 +116,14 @@ button {
 
 .brand-icon {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
   width: 42px;
   height: 42px;
   border-radius: 13px;
   background: #7c70ed;
-  color: white;
+  box-shadow: 0 5px 15px rgb(124 112 237 / 25%);
+  color: #fff;
   font-family: "Manrope", sans-serif;
   font-weight: 800;
 }
@@ -101,22 +159,32 @@ button {
 }
 
 .nav-item {
+  position: relative;
   display: block;
   margin: 3px 0;
   padding: 12px 13px;
   border-radius: 9px;
   color: #b8c6db;
-  text-decoration: none;
   font-size: 13px;
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .nav-item:hover,
 .nav-item.active {
   background: #2b3b56;
-  color: white;
+  color: #fff;
+}
+
+.nav-item:hover {
+  transform: translateX(2px);
 }
 
 .nav-item.active {
+  background: rgb(124 112 237 / 20%);
   box-shadow: inset 3px 0 #a79eff;
 }
 
@@ -130,10 +198,10 @@ button {
 }
 
 .online-dot {
-  width: 8px;
-  height: 8px;
   display: inline-block;
   flex-shrink: 0;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #28be88;
 }
@@ -153,7 +221,12 @@ button {
   font-size: 9px;
 }
 
+/* =========================================================
+   3. Main content and page header
+   ========================================================= */
+
 .main-content {
+  width: calc(100% - 245px);
   max-width: 1800px;
   min-height: 100vh;
   margin-left: 245px;
@@ -162,6 +235,7 @@ button {
 
 .topbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -170,33 +244,24 @@ button {
 
 .breadcrumb {
   margin-bottom: 9px;
-  color: #7e8ba0;
+  color: #687891;
   font-size: 12px;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-h1,
-h2,
-h3 {
-  font-family: "Manrope", sans-serif;
+  letter-spacing: 0.2px;
 }
 
 h1 {
   margin-bottom: 6px;
   font-size: clamp(24px, 2.5vw, 32px);
   letter-spacing: -1px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .subtitle {
   margin-bottom: 0;
-  color: #7b879a;
+  color: #65748b;
   font-size: 13px;
+  line-height: 1.7;
 }
 
 .topbar-status {
@@ -204,36 +269,49 @@ h1 {
   align-items: center;
   gap: 9px;
   padding: 10px 13px;
-  border: 1px solid #e3e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 9px;
-  background: white;
+  background: #fff;
   color: #637188;
   font-size: 12px;
   white-space: nowrap;
 }
 
+/* =========================================================
+   4. Summary statistic cards
+   ========================================================= */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
   margin-bottom: 24px;
 }
 
 .stat-card,
 .panel {
-  border: 1px solid #e8ecf3;
-  border-radius: 13px;
-  background: white;
-  box-shadow: 0 3px 14px rgb(27 43 69 / 3%);
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .stat-card {
-  min-width: 0;
   padding: 19px;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgb(23 37 60 / 8%);
 }
 
 .stat-icon {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
   width: 37px;
   height: 37px;
@@ -264,8 +342,9 @@ h1 {
 
 .stat-card p {
   margin-bottom: 7px;
-  color: #6d7b90;
+  color: #526178;
   font-size: 12px;
+  line-height: 1.5;
 }
 
 .stat-card strong {
@@ -274,12 +353,19 @@ h1 {
   font-family: "Manrope", sans-serif;
   font-size: 29px;
   font-weight: 800;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-card small {
-  color: #98a2b1;
+  color: #6f7d92;
   font-size: 10px;
+  line-height: 1.5;
 }
+
+/* =========================================================
+   5. Dashboard panels and headings
+   ========================================================= */
 
 .content-grid {
   display: grid;
@@ -289,12 +375,12 @@ h1 {
 }
 
 .panel {
-  min-width: 0;
   padding: 22px;
 }
 
 .panel-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
@@ -305,33 +391,53 @@ h1 {
   margin-bottom: 5px;
   font-size: 16px;
   letter-spacing: -0.3px;
+  line-height: 1.45;
 }
 
 .panel-heading p {
   margin-bottom: 0;
-  color: #8b96a7;
+  color: #65748b;
   font-size: 11px;
   line-height: 1.6;
 }
 
 .heading-icon {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
   width: 31px;
   height: 31px;
-  flex-shrink: 0;
   border-radius: 9px;
   background: #efedff;
   color: #7966df;
   font-size: 20px;
 }
 
-form label {
+.record-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #f0eeff;
+  color: #7264d9;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   6. Appointment form and toolbar
+   ========================================================= */
+
+form label,
+.toolbar label {
   display: block;
   margin: 15px 0 7px;
   color: #536176;
   font-size: 11px;
   font-weight: 700;
+  line-height: 1.5;
 }
 
 form input,
@@ -340,13 +446,24 @@ form select,
 .toolbar select {
   width: 100%;
   min-width: 0;
+  min-height: 44px;
   padding: 11px 12px;
-  border: 1px solid #dfe5ee;
-  border-radius: 7px;
+  border: 1px solid #dce3ee;
+  border-radius: 9px;
   outline: none;
   background: #fff;
   color: #344156;
   font-size: 12px;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+form input:hover,
+form select:hover,
+.toolbar input:hover,
+.toolbar select:hover {
+  border-color: #b8c0d4;
 }
 
 form input:focus,
@@ -360,21 +477,25 @@ form select:focus,
 .primary-button,
 .secondary-button {
   width: 100%;
+  min-height: 44px;
   margin-top: 22px;
   padding: 12px 15px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 9px;
   font-size: 12px;
   font-weight: 700;
 }
 
 .primary-button {
-  background: #7567e8;
-  color: white;
+  background: var(--color-primary);
+  box-shadow: 0 4px 10px rgb(99 91 219 / 15%);
+  color: #fff;
 }
 
-.primary-button:hover {
-  background: #6254d6;
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--color-primary-hover);
+  box-shadow: 0 6px 15px rgb(99 91 219 / 20%);
 }
 
 .primary-button:disabled {
@@ -385,17 +506,13 @@ form select:focus,
 .secondary-button {
   margin-top: 9px;
   border: 1px solid #dfe5ee;
-  background: white;
+  background: #fff;
   color: #526078;
 }
 
-.record-count {
-  padding: 7px 9px;
-  border-radius: 7px;
-  background: #f0eeff;
-  color: #7264d9;
-  font-size: 10px;
-  white-space: nowrap;
+.secondary-button:hover {
+  border-color: #bfc5d8;
+  background: #f8f9fd;
 }
 
 .toolbar {
@@ -412,32 +529,49 @@ form select:focus,
 }
 
 .refresh-button {
+  min-height: 42px;
   border: 1px solid #dfe5ee;
   border-radius: 7px;
-  background: white;
+  background: #fff;
   color: #65738a;
   font-size: 20px;
 }
 
+.refresh-button:hover {
+  border-color: #c5cbe0;
+  background: #f5f6fc;
+}
+
+/* =========================================================
+   7. Appointments table, statuses and actions
+   ========================================================= */
+
 .table-wrap {
+  max-width: 100%;
   overflow-x: auto;
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #c6ccda transparent;
 }
 
 table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   text-align: left;
 }
 
 thead {
-  background: #f7f8fc;
+  background: #f5f7fc;
 }
 
 th {
-  padding: 12px 10px;
+  padding: 14px 10px;
   color: #7c8799;
   font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -446,6 +580,7 @@ td {
   border-bottom: 1px solid #edf0f5;
   color: #56647a;
   font-size: 11px;
+  line-height: 1.7;
   vertical-align: middle;
 }
 
@@ -462,82 +597,104 @@ td strong {
 
 td small {
   margin-top: 3px;
-  color: #929daf;
+  color: #6f7d92;
   font-size: 10px;
 }
 
+tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+tbody tr:hover {
+  background: #f7f8ff;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 .status-select {
-  max-width: 112px;
-  padding: 6px 7px;
+  max-width: 100%;
+  min-height: 34px;
+  padding: 7px 11px;
   border: 1px solid transparent;
-  border-radius: 20px;
-  font-size: 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.status-select:focus-visible {
+  outline: 2px solid #635bdb;
+  outline-offset: 2px;
 }
 
 .status-select.pending {
   background: #fff2dc;
-  color: #a96a12;
+  color: #8c5709;
 }
 
 .status-select.approved {
   background: #e2f8ed;
-  color: #188357;
+  color: #176b49;
 }
 
 .status-select.completed {
   background: #e5efff;
-  color: #386db4;
+  color: #2c5795;
 }
 
 .status-select.cancelled {
   background: #ffebec;
-  color: #bd4c56;
+  color: #a82f3b;
 }
 
 .row-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .edit-button,
 .delete-button {
-  padding: 6px 8px;
+  min-height: 36px;
+  padding: 8px 11px;
   border: 1px solid #e2e6ef;
-  border-radius: 6px;
-  background: white;
-  font-size: 10px;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .edit-button {
   color: #6f61d9;
 }
 
+.edit-button:hover {
+  border-color: #c9c2ff;
+  background: #f0edff;
+}
+
 .delete-button {
   color: #cc535c;
 }
 
-.empty-state {
-  padding: 55px 15px;
-  text-align: center;
-  color: #8490a2;
-  font-size: 12px;
+.delete-button:hover {
+  border-color: #efb8bd;
+  background: #fff0f0;
 }
 
-.empty-state h3 {
-  margin: 12px 0 6px;
-  color: #45536a;
-  font-size: 14px;
-}
-
-.empty-state p {
-  margin-bottom: 0;
-  font-size: 11px;
-}
-
-.empty-icon {
-  font-size: 32px;
-  color: #9b91ef;
+.edit-button:active,
+.delete-button:active {
+  transform: scale(0.97);
 }
 
 .table-footer {
@@ -546,12 +703,18 @@ td small {
   font-size: 10px;
 }
 
+/* =========================================================
+   8. Alerts, empty states and page footer
+   ========================================================= */
+
 .alert {
   margin-bottom: 16px;
   padding: 12px 15px;
   border: 1px solid;
   border-radius: 8px;
   font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .alert.error {
@@ -566,406 +729,63 @@ td small {
   color: #18794e;
 }
 
+.empty-state {
+  padding: 55px 15px;
+  color: #8490a2;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.empty-state h3 {
+  margin: 12px 0 6px;
+  color: #45536a;
+  font-size: 14px;
+}
+
+.empty-state p {
+  margin-bottom: 0;
+  font-size: 11px;
+}
+
+.empty-icon {
+  color: #9b91ef;
+  font-size: 32px;
+}
+
 .page-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   margin-top: 25px;
   padding: 17px 2px;
   color: #929daf;
   font-size: 10px;
+  line-height: 1.7;
 }
 
-@media (max-width: 1200px) {
-  .main-content {
-    padding: 25px 20px;
-  }
+/* =========================================================
+   9. Tablet layout
+   ========================================================= */
 
+@media (max-width: 1200px) {
   .sidebar {
     width: 210px;
   }
 
   .main-content {
-    margin-left: 210px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 650px) {
-  .sidebar {
-    position: static;
-    width: 100%;
-    padding: 15px;
-  }
-
-  .brand {
-    padding-bottom: 15px;
-  }
-
-  .nav-label,
-  .sidebar-note,
-  .sidebar-footer {
-    display: none;
-  }
-
-  .sidebar .nav-item {
-    display: inline-block;
-    padding: 9px;
-    font-size: 11px;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 22px 13px;
-  }
-
-  .topbar {
-    align-items: flex-start;
-  }
-
-  .topbar-status {
-    font-size: 0;
-  }
-
-  .stats-grid {
-    gap: 10px;
-  }
-
-  .stat-card {
-    padding: 14px;
-  }
-
-  .panel {
-    padding: 15px;
-  }
-
-  .toolbar {
-    grid-template-columns: 1fr 35px;
-  }
-
-  .toolbar input {
-    grid-column: 1 / -1;
-  }
-
-  .page-footer {
-    flex-direction: column;
-  }
-}
-
-/* =========================================
-   Dashboard design improvements
-   ========================================= */
-
-:root {
-  --color-primary: #635bdb;
-  --color-primary-hover: #5148c5;
-  --color-text: #202b3c;
-  --color-muted: #758197;
-  --color-border: #e5eaf2;
-  --color-surface: #ffffff;
-  --color-page: #f5f7fb;
-  --radius-card: 16px;
-  --shadow-card: 0 6px 24px rgb(23 37 60 / 5%);
-  --transition-fast: 180ms ease;
-}
-
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 20px;
-}
-
-body {
-  min-width: 320px;
-  background: var(--color-page);
-  color: var(--color-text);
-}
-
-button,
-input,
-select {
-  min-height: 40px;
-}
-
-button {
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 3px solid rgb(99 91 219 / 35%);
-  outline-offset: 3px;
-}
-
-/* Sidebar */
-
-.sidebar {
-  border-right: 1px solid rgb(255 255 255 / 5%);
-}
-
-.brand-icon {
-  box-shadow: 0 5px 15px rgb(124 112 237 / 25%);
-}
-
-.nav-item {
-  position: relative;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.nav-item:hover {
-  transform: translateX(2px);
-}
-
-.nav-item.active {
-  background: rgb(124 112 237 / 20%);
-}
-
-/* Main header */
-
-.main-content {
-  width: calc(100% - 245px);
-  max-width: 1800px;
-}
-
-.topbar {
-  flex-wrap: wrap;
-}
-
-.breadcrumb {
-  letter-spacing: 0.2px;
-}
-
-h1 {
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.subtitle {
-  line-height: 1.7;
-}
-
-/* Statistics cards */
-
-.stats-grid {
-  gap: 18px;
-}
-
-.stat-card {
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgb(23 37 60 / 8%);
-}
-
-.stat-card strong {
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-icon {
-  flex-shrink: 0;
-}
-
-/* Panels and headings */
-
-.panel {
-  border-color: var(--color-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-}
-
-.panel-heading {
-  flex-wrap: wrap;
-}
-
-.panel-heading h2 {
-  line-height: 1.45;
-}
-
-.record-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 30px;
-}
-
-/* Forms and toolbars */
-
-form label,
-.toolbar label {
-  line-height: 1.5;
-}
-
-form input,
-form select,
-.toolbar input,
-.toolbar select {
-  min-height: 44px;
-  border-color: #dce3ee;
-  border-radius: 9px;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-form input:hover,
-form select:hover,
-.toolbar input:hover,
-.toolbar select:hover {
-  border-color: #b8c0d4;
-}
-
-.primary-button,
-.secondary-button {
-  min-height: 44px;
-  border-radius: 9px;
-}
-
-.primary-button {
-  background: var(--color-primary);
-  box-shadow: 0 4px 10px rgb(99 91 219 / 15%);
-}
-
-.primary-button:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 15px rgb(99 91 219 / 20%);
-}
-
-.secondary-button:hover {
-  border-color: #bfc5d8;
-  background: #f8f9fd;
-}
-
-.refresh-button {
-  min-height: 42px;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.refresh-button:hover {
-  border-color: #c5cbe0;
-  background: #f5f6fc;
-}
-
-/* Appointment table */
-
-.table-wrap {
-  max-width: 100%;
-  border-radius: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #c6ccda transparent;
-}
-
-table {
-  min-width: 600px;
-}
-
-thead {
-  background: #f5f7fc;
-}
-
-th {
-  padding-top: 14px;
-  padding-bottom: 14px;
-  letter-spacing: 0.35px;
-  text-transform: uppercase;
-}
-
-td {
-  line-height: 1.6;
-}
-
-tbody tr {
-  transition: background-color var(--transition-fast);
-}
-
-tbody tr:hover {
-  background: #fafbff;
-}
-
-tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.status-select {
-  min-height: 34px;
-  max-width: 100%;
-  cursor: pointer;
-}
-
-.edit-button,
-.delete-button {
-  min-height: 34px;
-  white-space: nowrap;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.edit-button:hover {
-  border-color: #d5d0ff;
-  background: #f5f3ff;
-}
-
-.delete-button:hover {
-  border-color: #f2c6ca;
-  background: #fff4f4;
-}
-
-/* Alerts and empty states */
-
-.alert {
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.empty-state {
-  line-height: 1.7;
-}
-
-.page-footer {
-  flex-wrap: wrap;
-  line-height: 1.7;
-}
-
-/* =========================================
-   Tablet layout
-   ========================================= */
-
-@media (max-width: 1200px) {
-  .main-content {
     width: calc(100% - 210px);
-  }
-
-  .content-grid {
-    grid-template-columns: minmax(0, 1fr);
+    margin-left: 210px;
+    padding: 25px 20px;
   }
 
   .stats-grid {
     gap: 14px;
+  }
+
+  .content-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .panel {
@@ -973,13 +793,14 @@ tbody tr:last-child td {
   }
 }
 
-/* =========================================
-   Mobile layout
-   ========================================= */
+/* =========================================================
+   10. Mobile layout
+   ========================================================= */
 
 @media (max-width: 650px) {
   .sidebar {
     position: relative;
+    width: 100%;
     padding: 14px;
   }
 
@@ -990,6 +811,12 @@ tbody tr:last-child td {
 
   .brand strong {
     font-size: 15px;
+  }
+
+  .nav-label,
+  .sidebar-note,
+  .sidebar-footer {
+    display: none;
   }
 
   .sidebar nav {
@@ -1015,6 +842,7 @@ tbody tr:last-child td {
   .main-content {
     width: 100%;
     min-width: 0;
+    margin-left: 0;
     padding: 20px 12px;
   }
 
@@ -1030,6 +858,7 @@ tbody tr:last-child td {
 
   .topbar-status {
     padding: 8px 10px;
+    font-size: 11px;
     white-space: normal;
   }
 
@@ -1051,16 +880,11 @@ tbody tr:last-child td {
   }
 
   .stat-card p {
-    line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
   .stat-card strong {
     font-size: clamp(22px, 6vw, 28px);
-  }
-
-  .stat-card small {
-    line-height: 1.5;
   }
 
   .content-grid {
@@ -1092,10 +916,6 @@ tbody tr:last-child td {
     min-height: 44px;
   }
 
-  .toolbar input {
-    grid-column: auto;
-  }
-
   .refresh-button {
     width: 100%;
   }
@@ -1123,7 +943,9 @@ tbody tr:last-child td {
   }
 }
 
-/* Extra-small phones */
+/* =========================================================
+   11. Extra-small phones
+   ========================================================= */
 
 @media (max-width: 380px) {
   .main-content {
@@ -1153,7 +975,9 @@ tbody tr:last-child td {
   }
 }
 
-/* Respect reduced-motion preferences */
+/* =========================================================
+   12. Respect reduced-motion preferences
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1165,125 +989,3 @@ tbody tr:last-child td {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* Fix low-contrast dashboard headings */
-h1,
-h2,
-h3,
-.panel-heading h2 {
-  color: #202b3c;
-}
-
-.breadcrumb {
-  color: #687891;
-}
-
-.subtitle,
-.panel-heading p {
-  color: #65748b;
-}
-
-/* Keep the dashboard readable on light backgrounds */
-.stat-card p {
-  color: #526178;
-}
-
-.stat-card small,
-td small {
-  color: #6f7d92;
-}
-
-/* Improve the visual separation of panels */
-.stat-card,
-.panel {
-  background: #ffffff;
-  border-color: #e3e8f1;
-}
-
-/* Make sure headings remain visible on smaller screens */
-@media (max-width: 650px) {
-  h1,
-  h2,
-  h3,
-  .panel-heading h2 {
-    color: #202b3c;
-  }
-}
-
-/* Refined appointment status controls */
-.status-select {
-  min-height: 34px;
-  padding: 7px 11px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  transition: box-shadow 180ms ease, border-color 180ms ease;
-}
-
-.status-select:focus-visible {
-  outline: 2px solid #635bdb;
-  outline-offset: 2px;
-}
-
-.status-select.pending {
-  background: #fff2dc;
-  color: #8c5709;
-}
-
-.status-select.approved {
-  background: #e2f8ed;
-  color: #176b49;
-}
-
-.status-select.completed {
-  background: #e5efff;
-  color: #2c5795;
-}
-
-.status-select.cancelled {
-  background: #ffebec;
-  color: #a82f3b;
-}
-
-/* Clearer table action buttons */
-.row-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.edit-button,
-.delete-button {
-  min-height: 36px;
-  padding: 8px 11px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.edit-button:hover {
-  background: #f0edff;
-  border-color: #c9c2ff;
-}
-
-.delete-button:hover {
-  background: #fff0f0;
-  border-color: #efb8bd;
-}
-
-.edit-button:active,
-.delete-button:active {
-  transform: scale(0.97);
-}
-
-/* Make table rows easier to scan */
-tbody tr:hover {
-  background: #f7f8ff;
-}
-
-td {
-  line-height: 1.7;
-}
-
-
