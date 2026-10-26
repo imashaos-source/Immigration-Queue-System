@@ -1,147 +1,189 @@
 
+/* =========================================
+   PUBLIC WEBSITE HEADER AND FOOTER
+   Navy, white and muted gold
+   ========================================= */
+
 .public-site {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f7f8f6;
-  color: #263a35;
+  background: #ffffff;
+  color: #18324f;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .public-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 10;
   display: flex;
+  min-height: 86px;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 16px clamp(20px, 5vw, 76px);
-  border-bottom: 1px solid #e0e7e2;
-  background: #fff;
+  gap: 28px;
+  padding: 16px max(32px, calc((100% - 1180px) / 2));
+  border-bottom: 1px solid #e3e8ef;
+  background: #ffffff;
 }
 
 .public-brand {
-  display: flex;
+  display: inline-flex;
+  min-width: 250px;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
+  color: #102b4e;
   text-decoration: none;
 }
 
 .public-brand-mark {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  border: 1px solid #c9ad70;
   border-radius: 5px;
-  background: #176b52;
-  color: white;
-  font-weight: 800;
+  background: #102b4e;
+  color: #ffffff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.public-brand-copy strong,
-.public-brand-copy small {
-  display: block;
+.public-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .public-brand-copy strong {
-  color: #203a31;
-  font-size: 13px;
+  color: #102b4e;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .public-brand-copy small {
-  margin-top: 4px;
-  color: #77867f;
-  font-size: 10px;
+  color: #69788a;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .public-nav {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2vw, 27px);
+  justify-content: flex-end;
+  gap: 25px;
 }
 
-.public-nav a {
-  color: #50645b;
-  font-size: 11px;
-  font-weight: 600;
+.public-nav > a {
+  color: #465971;
+  font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
-  white-space: nowrap;
+  transition: color 160ms ease;
 }
 
-.public-nav a:hover,
-.public-nav a.active {
-  color: #176b52;
+.public-nav > a:hover,
+.public-nav > a.active {
+  color: #a17d36;
 }
 
 .public-nav .staff-link {
-  padding-left: 18px;
-  border-left: 1px solid #dfe6e1;
-}
-
-.public-nav .nav-book-button {
-  padding: 12px 15px;
-  border: 1px solid #176b52;
-  border-radius: 4px;
-  background: #176b52;
-  color: white;
-}
-
-.public-nav .nav-book-button:hover {
-  background: #104c3c;
-  color: white;
+  color: #173858;
 }
 
 .public-main {
   flex: 1;
+  width: 100%;
 }
 
 .public-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 24px clamp(20px, 5vw, 76px);
-  border-top: 1px solid #e0e7e2;
-  background: white;
-  color: #75847d;
-  font-size: 10px;
+  gap: 24px;
+  padding: 32px max(32px, calc((100% - 1180px) / 2));
+  border-top: 1px solid #e3e8ef;
+  background: #f6f8fb;
 }
 
 .public-footer strong {
-  color: #30463c;
-  font-size: 11px;
+  color: #102b4e;
+  font-size: 15px;
 }
 
 .public-footer p {
-  margin: 5px 0 0;
+  margin: 7px 0 0;
+  color: #68788d;
+  font-size: 13px;
 }
 
-@media (max-width: 760px) {
+.public-footer > span {
+  color: #778599;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* Responsive navigation */
+
+@media (max-width: 900px) {
   .public-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 15px;
-    padding: 14px 18px;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 18px 24px;
+  }
+
+  .public-brand {
+    min-width: 0;
   }
 
   .public-nav {
     width: 100%;
     flex-wrap: wrap;
-    gap: 10px 16px;
+    justify-content: flex-start;
+    gap: 18px;
   }
 
-  .public-nav .staff-link {
-    padding-left: 0;
-    border-left: 0;
+  .public-footer {
+    padding: 28px 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .public-header {
+    padding: 16px 18px;
   }
 
-  .public-nav .nav-book-button {
-    padding: 9px 11px;
+  .public-brand-mark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .public-brand-copy strong {
+    font-size: 15px;
+  }
+
+  .public-brand-copy small {
+    font-size: 10px;
+  }
+
+  .public-nav {
+    gap: 14px;
+  }
+
+  .public-nav > a {
+    font-size: 13px;
   }
 
   .public-footer {
     align-items: flex-start;
     flex-direction: column;
-    padding: 20px 18px;
+    gap: 14px;
+    padding: 26px 18px;
+  }
+
+  .public-footer > span {
+    text-align: left;
   }
 }

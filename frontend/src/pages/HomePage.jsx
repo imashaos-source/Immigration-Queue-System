@@ -6,30 +6,54 @@ const services = [
   {
     number: "01",
     title: "Passport services",
-    description: "Request an appointment for passport-related services and document processing.",
+    description:
+      "Request an appointment for passport-related services and document processing.",
   },
   {
     number: "02",
     title: "Visa services",
-    description: "Arrange a visit for visa-related enquiries and service requests.",
+    description:
+      "Arrange a visit for visa-related enquiries and service requests.",
   },
   {
     number: "03",
     title: "Residence permits",
-    description: "Request an appointment for residence permit services.",
+    description:
+      "Request an appointment for residence permit services.",
   },
   {
     number: "04",
     title: "Citizenship services",
-    description: "Arrange a visit for citizenship-related matters.",
+    description:
+      "Arrange a visit for citizenship-related matters.",
   },
 ];
 
 const steps = [
-  ["01", "Submit a request", "Enter your details and preferred service and appointment time."],
-  ["02", "Wait for review", "Staff review your request and update its status."],
-  ["03", "Receive confirmation", "Check your appointment status after the request is reviewed."],
-  ["04", "Attend your visit", "Follow your confirmed appointment details."],
+  {
+    number: "01",
+    title: "Submit a request",
+    description:
+      "Enter your details, select a service and choose your preferred appointment date.",
+  },
+  {
+    number: "02",
+    title: "Wait for review",
+    description:
+      "Staff review your request and update its status.",
+  },
+  {
+    number: "03",
+    title: "Receive confirmation",
+    description:
+      "Check your appointment status after your request has been reviewed.",
+  },
+  {
+    number: "04",
+    title: "Attend your visit",
+    description:
+      "Follow the confirmed appointment details and prepare the required documents.",
+  },
 ];
 
 export default function HomePage() {
@@ -38,7 +62,8 @@ export default function HomePage() {
       <section className="home-hero">
         <div className="hero-content">
           <div className="home-eyebrow">
-            <span /> IMMIGRATION SERVICE PORTAL
+            <span />
+            IMMIGRATION SERVICE PORTAL
           </div>
 
           <h1>
@@ -48,15 +73,15 @@ export default function HomePage() {
           </h1>
 
           <p className="hero-description">
-            Request an appointment for immigration services, understand
-            the next steps, and prepare for your visit through one
-            straightforward portal.
+            Request an appointment, review the steps involved and
+            prepare for your visit through one straightforward portal.
           </p>
 
           <div className="hero-actions">
             <Link className="hero-primary" to="/book">
               Book an appointment <span>→</span>
             </Link>
+
             <a className="hero-secondary" href="#process">
               How appointments work
             </a>
@@ -65,39 +90,49 @@ export default function HomePage() {
           <div className="hero-note">
             <span className="note-symbol">i</span>
             <span>
-              Submitting a request does not mean the appointment is approved.
-              Please wait for confirmation.
+              An appointment request is not an approval.
+              Wait for confirmation before attending.
             </span>
           </div>
         </div>
 
         <div className="hero-side">
           <div className="hero-side-top">
-            <span className="hero-side-label">YOUR VISIT, ORGANIZED</span>
+            <span className="hero-side-label">PLAN BEFORE YOU VISIT</span>
             <span className="hero-side-rule" />
           </div>
 
           <div className="hero-illustration" aria-hidden="true">
             <div className="illustration-sun" />
+
             <div className="illustration-building">
               <div className="building-roof" />
+
               <div className="building-top">
-                <span /><span /><span />
+                <span />
+                <span />
+                <span />
               </div>
+
               <div className="building-columns">
-                <i /><i /><i /><i />
+                <i />
+                <i />
+                <i />
+                <i />
               </div>
+
               <div className="building-base" />
             </div>
+
             <div className="illustration-ground" />
           </div>
 
           <div className="hero-side-bottom">
             <span className="side-index">01 / 03</span>
             <div>
-              <strong>A clearer way to prepare</strong>
+              <strong>One place to get started</strong>
               <p>
-                Service information and appointment requests in one place.
+                Review the process and submit your appointment request online.
               </p>
             </div>
           </div>
@@ -110,7 +145,10 @@ export default function HomePage() {
             <span className="section-eyebrow">SERVICES</span>
             <h2>What can we help you with?</h2>
           </div>
-          <p>Choose the service that best matches the purpose of your visit.</p>
+
+          <p>
+            Choose the service that best matches the purpose of your visit.
+          </p>
         </div>
 
         <div className="service-grid">
@@ -119,6 +157,7 @@ export default function HomePage() {
               <span className="service-number">{service.number}</span>
               <h3>{service.title}</h3>
               <p>{service.description}</p>
+
               <Link to="/book">
                 Request appointment <span>↗</span>
               </Link>
@@ -131,19 +170,22 @@ export default function HomePage() {
         <div className="process-intro">
           <span className="section-eyebrow">THE PROCESS</span>
           <h2>Four steps to prepare for your visit.</h2>
-          <p>Follow the appointment process from request to confirmation.</p>
+          <p>
+            Understand what happens from the initial request to appointment confirmation.
+          </p>
+
           <Link to="/book" className="process-link">
             Start an appointment request <span>→</span>
           </Link>
         </div>
 
         <div className="process-steps">
-          {steps.map(([number, title, description]) => (
-            <article className="process-step" key={number}>
-              <span>{number}</span>
+          {steps.map((step) => (
+            <article className="process-step" key={step.number}>
+              <span>{step.number}</span>
               <div>
-                <h3>{title}</h3>
-                <p>{description}</p>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
               </div>
             </article>
           ))}
@@ -154,16 +196,17 @@ export default function HomePage() {
         <div>
           <span className="section-eyebrow">READY TO BEGIN?</span>
           <h2>Start with an appointment request.</h2>
-          <p>Keep your details ready before you begin.</p>
+          <p>Keep your contact details and relevant information ready.</p>
         </div>
+
         <Link to="/book">
           Book an appointment <span>→</span>
         </Link>
       </section>
 
       <p className="demo-disclaimer">
-        Academic project demonstration. Service information must be verified
-        before public deployment.
+        Academic project demonstration. This portal is not an official
+        government service. Verify service requirements before any real-world use.
       </p>
     </div>
   );

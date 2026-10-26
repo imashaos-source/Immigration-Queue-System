@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../App.css";
 
 const API_URL = "http://localhost:5000/api/appointments";
@@ -42,35 +44,92 @@ function formatTime(dateValue) {
 }
 
 function App() {
+  const navigate = useNavigate();
+
   const [appointments, setAppointments] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [selectedQueueDate, setSelectedQueueDate] = useState(() => getSriLankanDate(new Date()));
+  const [selectedQueueDate, setSelectedQueueDate] = useState(() =>
+    getSriLankanDate(new Date())
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  async function loadAppointments() {
+  const handleUnauthorized = useCallback(() => {
+    localStorage.removeItem("staffToken");
+    localStorage.removeItem("staffUser");
+    navigate("/staff/login", { replace: true });
+  }, [navigate]);
+
+  const authenticatedFetch = useCallback(
+    async (url, options = {}) => {
+      const token = localStorage.getItem("staffToken");
+
+      if (!token) {
+        handleUnauthorized();
+        throw new Error("Your session has ended. Please sign in again.");
+      }
+
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error("Your session has expired. Please sign in again.");
+      }
+
+      return response;
+    },
+    [handleUnauthorized]
+  );
+
+  const loadAppointments = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Could not load appointments.");
-      setAppointments(await response.json());
-    } catch {
-      setError("Cannot connect to the backend. Make sure your server is running on port 5000.");
+      const response = await authenticatedFetch(API_URL);
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not load appointments.");
+      }
+
+      setAppointments(result);
+    } catch (err) {
+      setError(
+        err.message ||
+          "Cannot connect to the backend. Make sure your server is running."
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, [authenticatedFetch]);
 
   useEffect(() => {
+    if (!localStorage.getItem("staffToken")) {
+      navigate("/staff/login", { replace: true });
+      return;
+    }
+
     loadAppointments();
-  }, []);
+  }, [navigate, loadAppointments]);
+
+  function handleLogout() {
+    localStorage.removeItem("staffToken");
+    localStorage.removeItem("staffUser");
+    navigate("/staff/login", { replace: true });
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -89,18 +148,26 @@ function App() {
     };
 
     try {
-      const response = await fetch(editingId ? `${API_URL}/${editingId}` : API_URL, {
-        method: editingId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await authenticatedFetch(
+        editingId ? `${API_URL}/${editingId}` : API_URL,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || result.message || "Request failed.");
       }
 
-      setNotice(editingId ? "Appointment updated successfully." : "Appointment created successfully.");
+      setNotice(
+        editingId
+          ? "Appointment updated successfully."
+          : "Appointment created successfully."
+      );
       setForm(emptyForm);
       setEditingId(null);
       await loadAppointments();
@@ -113,18 +180,27 @@ function App() {
 
   function startEditing(appointment) {
     setEditingId(appointment._id);
+
     const localDate = new Date(appointment.appointmentDate);
     const localOffset = localDate.getTimezoneOffset() * 60000;
+
     setForm({
       applicantName: appointment.applicantName,
       email: appointment.email,
       passportNumber: appointment.passportNumber,
       serviceType: appointment.serviceType,
-      appointmentDate: new Date(localDate.getTime() - localOffset).toISOString().slice(0, 16),
+      appointmentDate: new Date(
+        localDate.getTime() - localOffset
+      )
+        .toISOString()
+        .slice(0, 16),
     });
+
     setNotice("");
     setError("");
-    document.getElementById("appointment-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("appointment-form")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function cancelEditing() {
@@ -139,19 +215,25 @@ function App() {
     setNotice("");
 
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await authenticatedFetch(`${API_URL}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+
       const result = await response.json();
 
-      if (!response.ok) throw new Error(result.error || result.message || "Status update failed.");
+      if (!response.ok) {
+        throw new Error(
+          result.error || result.message || "Status update failed."
+        );
+      }
 
       const queueMessage =
         status === "Approved" && result.appointment?.queueNumber != null
           ? ` Queue number: ${result.appointment.queueNumber}.`
           : "";
+
       setNotice(`Appointment status updated.${queueMessage}`);
       await loadAppointments();
     } catch (err) {
@@ -160,18 +242,35 @@ function App() {
   }
 
   async function deleteAppointment(appointment) {
-    if (!window.confirm(`Delete the appointment for ${appointment.applicantName}?`)) return;
+    if (
+      !window.confirm(
+        `Delete the appointment for ${appointment.applicantName}?`
+      )
+    ) {
+      return;
+    }
 
     setError("");
     setNotice("");
 
     try {
-      const response = await fetch(`${API_URL}/${appointment._id}`, { method: "DELETE" });
+      const response = await authenticatedFetch(
+        `${API_URL}/${appointment._id}`,
+        { method: "DELETE" }
+      );
+
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Could not delete appointment.");
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not delete appointment.");
+      }
 
       setNotice("Appointment deleted successfully.");
-      if (editingId === appointment._id) cancelEditing();
+
+      if (editingId === appointment._id) {
+        cancelEditing();
+      }
+
       await loadAppointments();
     } catch (err) {
       setError(err.message || "Could not delete appointment.");
@@ -180,28 +279,54 @@ function App() {
 
   const filteredAppointments = appointments.filter((appointment) => {
     const term = search.trim().toLowerCase();
+
     const searchableValues = [
       appointment.applicantName,
       appointment.email,
       appointment.passportNumber,
       appointment.serviceType,
-      appointment.queueNumber == null ? "" : String(appointment.queueNumber),
+      appointment.queueNumber == null
+        ? ""
+        : String(appointment.queueNumber),
     ];
-    const matchesSearch = searchableValues.some((value) => String(value ?? "").toLowerCase().includes(term));
-    const matchesStatus = statusFilter === "All" || appointment.status === statusFilter;
+
+    const matchesSearch = searchableValues.some((value) =>
+      String(value ?? "").toLowerCase().includes(term)
+    );
+
+    const matchesStatus =
+      statusFilter === "All" || appointment.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
   const today = getSriLankanDate(new Date());
-  const todayCount = appointments.filter((appointment) => getSriLankanDate(appointment.appointmentDate) === today).length;
-  const pendingCount = appointments.filter((appointment) => appointment.status === "Pending").length;
-  const approvedCount = appointments.filter((appointment) => appointment.status === "Approved").length;
-  const completedCount = appointments.filter((appointment) => appointment.status === "Completed").length;
+
+  const todayCount = appointments.filter(
+    (appointment) =>
+      getSriLankanDate(appointment.appointmentDate) === today
+  ).length;
+
+  const pendingCount = appointments.filter(
+    (appointment) => appointment.status === "Pending"
+  ).length;
+
+  const approvedCount = appointments.filter(
+    (appointment) => appointment.status === "Approved"
+  ).length;
+
+  const completedCount = appointments.filter(
+    (appointment) => appointment.status === "Completed"
+  ).length;
 
   const dailyQueue = appointments
     .filter((appointment) => {
       if (appointment.status !== "Approved") return false;
-      const queueDate = appointment.queueDate || getSriLankanDate(appointment.appointmentDate);
+
+      const queueDate =
+        appointment.queueDate ||
+        getSriLankanDate(appointment.appointmentDate);
+
       return queueDate === selectedQueueDate;
     })
     .sort((a, b) => {
@@ -210,10 +335,22 @@ function App() {
       return a.queueNumber - b.queueNumber;
     });
 
+  const staffUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("staffUser") || "null");
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <a className="brand" href="#dashboard" aria-label="Immigration services home">
+        <a
+          className="brand"
+          href="#dashboard"
+          aria-label="Immigration services home"
+        >
           <span className="brand-mark">IQ</span>
           <span className="brand-copy">
             <strong>Immigration Services</strong>
@@ -222,18 +359,41 @@ function App() {
         </a>
 
         <div className="nav-label">OPERATIONS</div>
+
         <nav className="sidebar-nav" aria-label="Main navigation">
-          <a className="nav-item active" href="#dashboard"><span className="nav-symbol">▦</span>Overview</a>
-          <a className="nav-item" href="#queue"><span className="nav-symbol">№</span>Daily queue</a>
-          <a className="nav-item" href="#appointments"><span className="nav-symbol">≡</span>Appointments</a>
-          <a className="nav-item" href="#appointment-form"><span className="nav-symbol">＋</span>Register applicant</a>
+          <a className="nav-item active" href="#dashboard">
+            <span className="nav-symbol">▦</span>Overview
+          </a>
+          <a className="nav-item" href="#queue">
+            <span className="nav-symbol">№</span>Daily queue
+          </a>
+          <a className="nav-item" href="#appointments">
+            <span className="nav-symbol">≡</span>Appointments
+          </a>
+          <a className="nav-item" href="#appointment-form">
+            <span className="nav-symbol">＋</span>Register applicant
+          </a>
         </nav>
 
         <div className="sidebar-bottom">
           <span className="connection-dot" />
-          <div><strong>System connection</strong><small>Local development</small></div>
+          <div>
+            <strong>{staffUser?.name || "Signed-in staff"}</strong>
+            <small>{staffUser?.role || "Staff account"}</small>
+          </div>
         </div>
-        <div className="sidebar-version">IMMIGRATION QUEUE SYSTEM <span>v1.0</span></div>
+
+        <button
+          className="quiet-button"
+          type="button"
+          onClick={handleLogout}
+        >
+          Log out
+        </button>
+
+        <div className="sidebar-version">
+          IMMIGRATION QUEUE SYSTEM <span>v1.0</span>
+        </div>
       </aside>
 
       <main className="main-content" id="dashboard">
@@ -241,21 +401,64 @@ function App() {
           <div>
             <div className="eyebrow">OPERATIONS / OVERVIEW</div>
             <h1>Appointment operations</h1>
-            <p className="page-description">Review scheduled visits, manage applicant records, and keep today's queue moving.</p>
+            <p className="page-description">
+              Review scheduled visits, manage applicant records, and keep
+              today's queue moving.
+            </p>
           </div>
-          <button className="header-action" type="button" onClick={() => document.getElementById("appointment-form")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+
+          <button
+            className="header-action"
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("appointment-form")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          >
             <span aria-hidden="true">＋</span> Register appointment
           </button>
         </header>
 
-        {error && <div className="message message-error" role="alert">{error}</div>}
-        {notice && <div className="message message-success" role="status">{notice}</div>}
+        {error && (
+          <div className="message message-error" role="alert">
+            {error}
+          </div>
+        )}
+
+        {notice && (
+          <div className="message message-success" role="status">
+            {notice}
+          </div>
+        )}
 
         <section className="overview-strip" aria-label="Appointment overview">
-          <div className="overview-item"><span className="overview-label">All appointments</span><strong>{appointments.length}</strong><span className="overview-note">Records in system</span></div>
-          <div className="overview-item"><span className="overview-label">Awaiting review</span><strong>{pendingCount}</strong><span className="overview-note"><i className="status-dot pending-dot" /> Pending</span></div>
-          <div className="overview-item"><span className="overview-label">Approved</span><strong>{approvedCount}</strong><span className="overview-note"><i className="status-dot approved-dot" /> Ready for service</span></div>
-          <div className="overview-item"><span className="overview-label">Scheduled today</span><strong>{todayCount}</strong><span className="overview-note">{completedCount} completed overall</span></div>
+          <div className="overview-item">
+            <span className="overview-label">All appointments</span>
+            <strong>{appointments.length}</strong>
+            <span className="overview-note">Records in system</span>
+          </div>
+          <div className="overview-item">
+            <span className="overview-label">Awaiting review</span>
+            <strong>{pendingCount}</strong>
+            <span className="overview-note">
+              <i className="status-dot pending-dot" /> Pending
+            </span>
+          </div>
+          <div className="overview-item">
+            <span className="overview-label">Approved</span>
+            <strong>{approvedCount}</strong>
+            <span className="overview-note">
+              <i className="status-dot approved-dot" /> Ready for service
+            </span>
+          </div>
+          <div className="overview-item">
+            <span className="overview-label">Scheduled today</span>
+            <strong>{todayCount}</strong>
+            <span className="overview-note">
+              {completedCount} completed overall
+            </span>
+          </div>
         </section>
 
         <section className="work-section queue-section" id="queue">
@@ -265,15 +468,29 @@ function App() {
               <h2>Daily queue</h2>
               <p>Approved appointments, ordered by queue number.</p>
             </div>
+
             <label className="date-control" htmlFor="queueDate">
               <span>Queue date</span>
-              <input id="queueDate" type="date" value={selectedQueueDate} onChange={(event) => setSelectedQueueDate(event.target.value)} />
+              <input
+                id="queueDate"
+                type="date"
+                value={selectedQueueDate}
+                onChange={(event) =>
+                  setSelectedQueueDate(event.target.value)
+                }
+              />
             </label>
           </div>
 
           <div className="queue-summary">
-            <span><strong>{dailyQueue.length}</strong> people in this queue</span>
-            <span className="queue-date-label">{selectedQueueDate ? formatDate(`${selectedQueueDate}T00:00:00`) : ""}</span>
+            <span>
+              <strong>{dailyQueue.length}</strong> people in this queue
+            </span>
+            <span className="queue-date-label">
+              {selectedQueueDate
+                ? formatDate(`${selectedQueueDate}T00:00:00`)
+                : ""}
+            </span>
           </div>
 
           {loading ? (
@@ -281,21 +498,54 @@ function App() {
           ) : dailyQueue.length === 0 ? (
             <div className="table-message empty-queue">
               <strong>No approved appointments for this date</strong>
-              <span>Choose another date or approve an appointment to add it to the queue.</span>
+              <span>
+                Choose another date or approve an appointment to add it to the
+                queue.
+              </span>
             </div>
           ) : (
             <div className="table-scroll">
               <table className="data-table queue-table">
-                <thead><tr><th className="queue-number-cell">Queue</th><th>Applicant</th><th>Passport number</th><th>Service</th><th>Appointment time</th><th>Record status</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th className="queue-number-cell">Queue</th>
+                    <th>Applicant</th>
+                    <th>Passport number</th>
+                    <th>Service</th>
+                    <th>Appointment time</th>
+                    <th>Record status</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {dailyQueue.map((appointment) => (
                     <tr key={appointment._id}>
-                      <td className="queue-number-cell"><span className="queue-number">{appointment.queueNumber == null ? "—" : String(appointment.queueNumber).padStart(2, "0")}</span></td>
-                      <td><div className="applicant-cell"><strong>{appointment.applicantName}</strong><small>{appointment.email}</small></div></td>
-                      <td className="passport-cell">{appointment.passportNumber}</td>
+                      <td className="queue-number-cell">
+                        <span className="queue-number">
+                          {appointment.queueNumber == null
+                            ? "—"
+                            : String(appointment.queueNumber).padStart(2, "0")}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="applicant-cell">
+                          <strong>{appointment.applicantName}</strong>
+                          <small>{appointment.email}</small>
+                        </div>
+                      </td>
+                      <td className="passport-cell">
+                        {appointment.passportNumber}
+                      </td>
                       <td>{appointment.serviceType}</td>
-                      <td className="time-cell">{formatTime(appointment.appointmentDate)}</td>
-                      <td><span className={`status-label ${appointment.status.toLowerCase()}`}>{appointment.status}</span></td>
+                      <td className="time-cell">
+                        {formatTime(appointment.appointmentDate)}
+                      </td>
+                      <td>
+                        <span
+                          className={`status-label ${appointment.status.toLowerCase()}`}
+                        >
+                          {appointment.status}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -311,78 +561,279 @@ function App() {
               <h2>Appointments</h2>
               <p>Search, update, or review an applicant's appointment.</p>
             </div>
-            <div className="record-total"><strong>{filteredAppointments.length}</strong><span>of {appointments.length} records</span></div>
+            <div className="record-total">
+              <strong>{filteredAppointments.length}</strong>
+              <span>of {appointments.length} records</span>
+            </div>
           </div>
 
           <div className="table-tools">
             <label className="search-control">
               <span className="visually-hidden">Search appointments</span>
-              <span className="search-symbol" aria-hidden="true">⌕</span>
-              <input placeholder="Search name, email, passport or queue…" value={search} onChange={(event) => setSearch(event.target.value)} />
+              <span className="search-symbol" aria-hidden="true">
+                ⌕
+              </span>
+              <input
+                placeholder="Search name, email, passport or queue…"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
             </label>
-            <label className="filter-control"><span className="visually-hidden">Filter by status</span>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="All">All statuses</option><option value="Pending">Pending</option><option value="Approved">Approved</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
+
+            <label className="filter-control">
+              <span className="visually-hidden">Filter by status</span>
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="All">All statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
             </label>
-            <button className="quiet-button" type="button" onClick={loadAppointments} disabled={loading}>Refresh records</button>
+
+            <button
+              className="quiet-button"
+              type="button"
+              onClick={loadAppointments}
+              disabled={loading}
+            >
+              Refresh records
+            </button>
           </div>
 
           {loading ? (
             <div className="table-message">Loading appointments…</div>
           ) : filteredAppointments.length === 0 ? (
-            <div className="table-message empty-queue"><strong>No appointments found</strong><span>Try a different search or status filter.</span></div>
+            <div className="table-message empty-queue">
+              <strong>No appointments found</strong>
+              <span>Try a different search or status filter.</span>
+            </div>
           ) : (
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>Applicant</th><th>Service</th><th>Date</th><th>Queue</th><th>Status</th><th className="actions-heading">Actions</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Applicant</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Queue</th>
+                    <th>Status</th>
+                    <th className="actions-heading">Actions</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {filteredAppointments.map((appointment) => (
                     <tr key={appointment._id}>
-                      <td><div className="applicant-cell"><strong>{appointment.applicantName}</strong><small>{appointment.email}</small><small>Passport: {appointment.passportNumber}</small></div></td>
+                      <td>
+                        <div className="applicant-cell">
+                          <strong>{appointment.applicantName}</strong>
+                          <small>{appointment.email}</small>
+                          <small>Passport: {appointment.passportNumber}</small>
+                        </div>
+                      </td>
                       <td>{appointment.serviceType}</td>
-                      <td><span className="date-cell">{formatDate(appointment.appointmentDate)}</span><small className="table-subtext">{formatTime(appointment.appointmentDate)}</small></td>
-                      <td>{appointment.queueNumber == null ? <span className="not-assigned">Not assigned</span> : <span className="inline-queue">#{appointment.queueNumber}</span>}</td>
-                      <td><label className="status-editor"><span className="visually-hidden">Status for {appointment.applicantName}</span>
-                        <select className={`status-select ${appointment.status.toLowerCase()}`} value={appointment.status} onChange={(event) => updateStatus(appointment._id, event.target.value)}>
-                          <option value="Pending">Pending</option><option value="Approved">Approved</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
-                        </select>
-                      </label></td>
-                      <td><div className="row-actions"><button className="text-action" type="button" onClick={() => startEditing(appointment)}>Edit</button><button className="text-action delete-action" type="button" onClick={() => deleteAppointment(appointment)}>Delete</button></div></td>
+                      <td>
+                        <span className="date-cell">
+                          {formatDate(appointment.appointmentDate)}
+                        </span>
+                        <small className="table-subtext">
+                          {formatTime(appointment.appointmentDate)}
+                        </small>
+                      </td>
+                      <td>
+                        {appointment.queueNumber == null ? (
+                          <span className="not-assigned">Not assigned</span>
+                        ) : (
+                          <span className="inline-queue">
+                            #{appointment.queueNumber}
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <label className="status-editor">
+                          <span className="visually-hidden">
+                            Status for {appointment.applicantName}
+                          </span>
+                          <select
+                            className={`status-select ${appointment.status.toLowerCase()}`}
+                            value={appointment.status}
+                            onChange={(event) =>
+                              updateStatus(appointment._id, event.target.value)
+                            }
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </label>
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <button
+                            className="text-action"
+                            type="button"
+                            onClick={() => startEditing(appointment)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="text-action delete-action"
+                            type="button"
+                            onClick={() => deleteAppointment(appointment)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-          <div className="table-footnote">Showing {filteredAppointments.length} appointment{filteredAppointments.length === 1 ? "" : "s"}.</div>
+
+          <div className="table-footnote">
+            Showing {filteredAppointments.length} appointment
+            {filteredAppointments.length === 1 ? "" : "s"}.
+          </div>
         </section>
 
         <section className="work-section form-section" id="appointment-form">
           <div className="section-heading">
             <div>
-              <div className="section-kicker">{editingId ? "UPDATE RECORD" : "NEW RECORD"}</div>
-              <h2>{editingId ? "Edit appointment" : "Register an appointment"}</h2>
-              <p>{editingId ? "Update the applicant's details and save your changes." : "Enter the applicant's details to create an appointment record."}</p>
+              <div className="section-kicker">
+                {editingId ? "UPDATE RECORD" : "NEW RECORD"}
+              </div>
+              <h2>
+                {editingId ? "Edit appointment" : "Register an appointment"}
+              </h2>
+              <p>
+                {editingId
+                  ? "Update the applicant's details and save your changes."
+                  : "Enter the applicant's details to create an appointment record."}
+              </p>
             </div>
-            {editingId && <span className="editing-indicator">Editing appointment</span>}
+            {editingId && (
+              <span className="editing-indicator">Editing appointment</span>
+            )}
           </div>
 
           <form className="appointment-form" onSubmit={handleSubmit}>
-            <div className="form-field"><label htmlFor="applicantName">Applicant name <span>*</span></label><input id="applicantName" name="applicantName" value={form.applicantName} onChange={handleChange} placeholder="Full name as shown on passport" required /></div>
-            <div className="form-field"><label htmlFor="passportNumber">Passport number <span>*</span></label><input id="passportNumber" name="passportNumber" value={form.passportNumber} onChange={handleChange} placeholder="Enter passport number" required /></div>
-            <div className="form-field"><label htmlFor="email">Email address <span>*</span></label><input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="applicant@example.com" required /></div>
-            <div className="form-field"><label htmlFor="serviceType">Service required <span>*</span></label><select id="serviceType" name="serviceType" value={form.serviceType} onChange={handleChange} required><option>Passport Services</option><option>Visa Services</option><option>Residence Permit</option><option>Citizenship Services</option><option>Other</option></select></div>
-            <div className="form-field"><label htmlFor="appointmentDate">Appointment date and time <span>*</span></label><input id="appointmentDate" name="appointmentDate" type="datetime-local" value={form.appointmentDate} onChange={handleChange} required /></div>
+            <div className="form-field">
+              <label htmlFor="applicantName">
+                Applicant name <span>*</span>
+              </label>
+              <input
+                id="applicantName"
+                name="applicantName"
+                value={form.applicantName}
+                onChange={handleChange}
+                placeholder="Full name as shown on passport"
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="passportNumber">
+                Passport number <span>*</span>
+              </label>
+              <input
+                id="passportNumber"
+                name="passportNumber"
+                value={form.passportNumber}
+                onChange={handleChange}
+                placeholder="Enter passport number"
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="email">
+                Email address <span>*</span>
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="applicant@example.com"
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="serviceType">
+                Service required <span>*</span>
+              </label>
+              <select
+                id="serviceType"
+                name="serviceType"
+                value={form.serviceType}
+                onChange={handleChange}
+                required
+              >
+                <option>Passport Services</option>
+                <option>Visa Services</option>
+                <option>Residence Permit</option>
+                <option>Citizenship Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="appointmentDate">
+                Appointment date and time <span>*</span>
+              </label>
+              <input
+                id="appointmentDate"
+                name="appointmentDate"
+                type="datetime-local"
+                value={form.appointmentDate}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
             <div className="form-actions">
-              <button className="primary-action" type="submit" disabled={saving}>{saving ? "Saving record…" : editingId ? "Save changes" : "Create appointment"}</button>
-              {editingId && <button className="quiet-button" type="button" onClick={cancelEditing}>Cancel edit</button>}
+              <button
+                className="primary-action"
+                type="submit"
+                disabled={saving}
+              >
+                {saving
+                  ? "Saving record…"
+                  : editingId
+                    ? "Save changes"
+                    : "Create appointment"}
+              </button>
+
+              {editingId && (
+                <button
+                  className="quiet-button"
+                  type="button"
+                  onClick={cancelEditing}
+                >
+                  Cancel edit
+                </button>
+              )}
             </div>
           </form>
-          <p className="form-note"><span>*</span> Required fields. Queue numbers are managed by the system when an appointment is approved.</p>
+
+          <p className="form-note">
+            <span>*</span> Required fields. Queue numbers are managed by the
+            system when an appointment is approved.
+          </p>
         </section>
 
-        <footer className="page-footer"><span>Immigration Appointment &amp; Queue Management System</span><span>Internal operations · Development version</span></footer>
+        <footer className="page-footer">
+          <span>Immigration Appointment &amp; Queue Management System</span>
+          <span>Internal operations · Development version</span>
+        </footer>
       </main>
     </div>
   );
