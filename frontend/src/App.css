@@ -658,3 +658,632 @@ td small {
     flex-direction: column;
   }
 }
+
+/* =========================================
+   Dashboard design improvements
+   ========================================= */
+
+:root {
+  --color-primary: #635bdb;
+  --color-primary-hover: #5148c5;
+  --color-text: #202b3c;
+  --color-muted: #758197;
+  --color-border: #e5eaf2;
+  --color-surface: #ffffff;
+  --color-page: #f5f7fb;
+  --radius-card: 16px;
+  --shadow-card: 0 6px 24px rgb(23 37 60 / 5%);
+  --transition-fast: 180ms ease;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 20px;
+}
+
+body {
+  min-width: 320px;
+  background: var(--color-page);
+  color: var(--color-text);
+}
+
+button,
+input,
+select {
+  min-height: 40px;
+}
+
+button {
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgb(99 91 219 / 35%);
+  outline-offset: 3px;
+}
+
+/* Sidebar */
+
+.sidebar {
+  border-right: 1px solid rgb(255 255 255 / 5%);
+}
+
+.brand-icon {
+  box-shadow: 0 5px 15px rgb(124 112 237 / 25%);
+}
+
+.nav-item {
+  position: relative;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.nav-item:hover {
+  transform: translateX(2px);
+}
+
+.nav-item.active {
+  background: rgb(124 112 237 / 20%);
+}
+
+/* Main header */
+
+.main-content {
+  width: calc(100% - 245px);
+  max-width: 1800px;
+}
+
+.topbar {
+  flex-wrap: wrap;
+}
+
+.breadcrumb {
+  letter-spacing: 0.2px;
+}
+
+h1 {
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.subtitle {
+  line-height: 1.7;
+}
+
+/* Statistics cards */
+
+.stats-grid {
+  gap: 18px;
+}
+
+.stat-card {
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgb(23 37 60 / 8%);
+}
+
+.stat-card strong {
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-icon {
+  flex-shrink: 0;
+}
+
+/* Panels and headings */
+
+.panel {
+  border-color: var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.panel-heading {
+  flex-wrap: wrap;
+}
+
+.panel-heading h2 {
+  line-height: 1.45;
+}
+
+.record-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+}
+
+/* Forms and toolbars */
+
+form label,
+.toolbar label {
+  line-height: 1.5;
+}
+
+form input,
+form select,
+.toolbar input,
+.toolbar select {
+  min-height: 44px;
+  border-color: #dce3ee;
+  border-radius: 9px;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+form input:hover,
+form select:hover,
+.toolbar input:hover,
+.toolbar select:hover {
+  border-color: #b8c0d4;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 44px;
+  border-radius: 9px;
+}
+
+.primary-button {
+  background: var(--color-primary);
+  box-shadow: 0 4px 10px rgb(99 91 219 / 15%);
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgb(99 91 219 / 20%);
+}
+
+.secondary-button:hover {
+  border-color: #bfc5d8;
+  background: #f8f9fd;
+}
+
+.refresh-button {
+  min-height: 42px;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.refresh-button:hover {
+  border-color: #c5cbe0;
+  background: #f5f6fc;
+}
+
+/* Appointment table */
+
+.table-wrap {
+  max-width: 100%;
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #c6ccda transparent;
+}
+
+table {
+  min-width: 600px;
+}
+
+thead {
+  background: #f5f7fc;
+}
+
+th {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+td {
+  line-height: 1.6;
+}
+
+tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+tbody tr:hover {
+  background: #fafbff;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.status-select {
+  min-height: 34px;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.edit-button,
+.delete-button {
+  min-height: 34px;
+  white-space: nowrap;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.edit-button:hover {
+  border-color: #d5d0ff;
+  background: #f5f3ff;
+}
+
+.delete-button:hover {
+  border-color: #f2c6ca;
+  background: #fff4f4;
+}
+
+/* Alerts and empty states */
+
+.alert {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  line-height: 1.7;
+}
+
+.page-footer {
+  flex-wrap: wrap;
+  line-height: 1.7;
+}
+
+/* =========================================
+   Tablet layout
+   ========================================= */
+
+@media (max-width: 1200px) {
+  .main-content {
+    width: calc(100% - 210px);
+  }
+
+  .content-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats-grid {
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 20px;
+  }
+}
+
+/* =========================================
+   Mobile layout
+   ========================================= */
+
+@media (max-width: 650px) {
+  .sidebar {
+    position: relative;
+    padding: 14px;
+  }
+
+  .brand {
+    gap: 10px;
+    padding: 4px 2px 14px;
+  }
+
+  .brand strong {
+    font-size: 15px;
+  }
+
+  .sidebar nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .sidebar .nav-item {
+    margin: 0;
+    padding: 9px 11px;
+    border-radius: 8px;
+  }
+
+  .nav-item:hover {
+    transform: none;
+  }
+
+  .nav-item.active {
+    box-shadow: inset 0 -2px #a79eff;
+  }
+
+  .main-content {
+    width: 100%;
+    min-width: 0;
+    padding: 20px 12px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .topbar > * {
+    min-width: 0;
+  }
+
+  .topbar-status {
+    padding: 8px 10px;
+    white-space: normal;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    padding: 13px;
+    border-radius: 12px;
+  }
+
+  .stat-icon {
+    width: 33px;
+    height: 33px;
+    margin-bottom: 10px;
+  }
+
+  .stat-card p {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .stat-card strong {
+    font-size: clamp(22px, 6vw, 28px);
+  }
+
+  .stat-card small {
+    line-height: 1.5;
+  }
+
+  .content-grid {
+    gap: 15px;
+  }
+
+  .panel {
+    padding: 15px 12px;
+    border-radius: 12px;
+  }
+
+  .panel-heading {
+    gap: 9px;
+    margin-bottom: 17px;
+  }
+
+  .panel-heading h2 {
+    font-size: 15px;
+  }
+
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .toolbar input,
+  .toolbar select {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .toolbar input {
+    grid-column: auto;
+  }
+
+  .refresh-button {
+    width: 100%;
+  }
+
+  .table-wrap {
+    margin-inline: -2px;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  th,
+  td {
+    padding: 11px 9px;
+  }
+
+  .row-actions {
+    flex-wrap: wrap;
+  }
+
+  .page-footer {
+    gap: 7px;
+    margin-top: 15px;
+  }
+}
+
+/* Extra-small phones */
+
+@media (max-width: 380px) {
+  .main-content {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px;
+  }
+
+  .stat-card strong {
+    font-size: 22px;
+  }
+
+  .panel {
+    padding: 12px 9px;
+  }
+
+  h1 {
+    font-size: 23px;
+    letter-spacing: -0.6px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fix low-contrast dashboard headings */
+h1,
+h2,
+h3,
+.panel-heading h2 {
+  color: #202b3c;
+}
+
+.breadcrumb {
+  color: #687891;
+}
+
+.subtitle,
+.panel-heading p {
+  color: #65748b;
+}
+
+/* Keep the dashboard readable on light backgrounds */
+.stat-card p {
+  color: #526178;
+}
+
+.stat-card small,
+td small {
+  color: #6f7d92;
+}
+
+/* Improve the visual separation of panels */
+.stat-card,
+.panel {
+  background: #ffffff;
+  border-color: #e3e8f1;
+}
+
+/* Make sure headings remain visible on smaller screens */
+@media (max-width: 650px) {
+  h1,
+  h2,
+  h3,
+  .panel-heading h2 {
+    color: #202b3c;
+  }
+}
+
+/* Refined appointment status controls */
+.status-select {
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.status-select:focus-visible {
+  outline: 2px solid #635bdb;
+  outline-offset: 2px;
+}
+
+.status-select.pending {
+  background: #fff2dc;
+  color: #8c5709;
+}
+
+.status-select.approved {
+  background: #e2f8ed;
+  color: #176b49;
+}
+
+.status-select.completed {
+  background: #e5efff;
+  color: #2c5795;
+}
+
+.status-select.cancelled {
+  background: #ffebec;
+  color: #a82f3b;
+}
+
+/* Clearer table action buttons */
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.edit-button:hover {
+  background: #f0edff;
+  border-color: #c9c2ff;
+}
+
+.delete-button:hover {
+  background: #fff0f0;
+  border-color: #efb8bd;
+}
+
+.edit-button:active,
+.delete-button:active {
+  transform: scale(0.97);
+}
+
+/* Make table rows easier to scan */
+tbody tr:hover {
+  background: #f7f8ff;
+}
+
+td {
+  line-height: 1.7;
+}
+
+
