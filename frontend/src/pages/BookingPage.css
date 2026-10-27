@@ -154,10 +154,12 @@
   box-shadow: 0 8px 28px rgb(23 43 69 / 3%);
 }
 
-.booking-form-heading {
+..booking-form-heading {
   margin-bottom: 28px;
   padding-bottom: 22px;
   border-bottom: 1px solid #eeeae3;
+  text-align: left;
+}
 }
 
 .booking-form-heading h2,
@@ -568,4 +570,10 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+/* Fix booking page heading contrast */
+.booking-page .booking-form-heading h2,
+.booking-page .booking-aside h2 {
+  color: #172b45;
+  opacity: 1;
 }
