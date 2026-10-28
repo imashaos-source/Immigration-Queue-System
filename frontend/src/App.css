@@ -1084,3 +1084,39 @@ button:disabled {
     align-items: flex-start;
   }
 }
+
+/* Full-width dashboard layout fix */
+html,
+body {
+  width: 100%;
+  min-width: 320px;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.app-shell {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  align-items: stretch;
+}
+
+.sidebar {
+  flex: 0 0 252px;
+}
+
+.main-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
