@@ -1,0 +1,54 @@
+
+.back-home-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto 22px;
+}
+
+.back-home-buttons button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid #cfd8e3;
+  border-radius: 5px;
+  background: #fffefa;
+  color: #102b4e;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.back-home-buttons .page-back-button:hover {
+  border-color: #c4a76a;
+  background: #f4efe4;
+}
+
+.back-home-buttons .page-home-button {
+  border-color: #1d4169;
+  background: #1d4169;
+  color: #fff;
+}
+
+.back-home-buttons .page-home-button:hover {
+  border-color: #102b4e;
+  background: #102b4e;
+}
+
+.back-home-buttons button:focus-visible {
+  outline: 3px solid rgba(196, 167, 106, 0.55);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .back-home-buttons {
+    gap: 8px;
+    margin-bottom: 17px;
+  }
+}
