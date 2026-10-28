@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./AppointmentStatusPage.css";
+import BackHomeButtons from "../components/BackHomeButtons";
 
 const API_URL = "http://localhost:5000/api/appointments/check-status";
 
@@ -74,9 +75,7 @@ export default function AppointmentStatusPage() {
   return (
     <main className="appointment-status-page">
       <section className="status-intro">
-        <Link to="/" className="status-back-link">
-          ← Back to home
-        </Link>
+        <BackHomeButtons />
 
         <span className="status-eyebrow">APPOINTMENT SERVICES</span>
 

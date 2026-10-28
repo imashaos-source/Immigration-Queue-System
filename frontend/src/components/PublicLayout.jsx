@@ -30,8 +30,6 @@ export default function PublicLayout() {
             Check appointment
           </NavLink>
 
-          <NavLink to="/walk-in">Join queue</NavLink>
-
           <NavLink to="/live-board">Live board</NavLink>
 
           <Link to="/staff/login" className="staff-link">

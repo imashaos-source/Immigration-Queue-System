@@ -1,5 +1,4 @@
-
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import "./BackHomeButtons.css";
 
 export default function BackHomeButtons() {
@@ -15,8 +14,12 @@ export default function BackHomeButtons() {
 
   return (
     <div className="back-home-buttons">
-      <button type="button" className="page-back-button" onClick={goBack}>
-        ← Back
+      <button
+        type="button"
+        className="page-back-button"
+        onClick={goBack}
+      >
+        {"\u2190"} Back
       </button>
 
       <button
@@ -24,7 +27,7 @@ export default function BackHomeButtons() {
         className="page-home-button"
         onClick={() => navigate("/")}
       >
-        <span aria-hidden="true">⌂</span> Home
+        Home
       </button>
     </div>
   );

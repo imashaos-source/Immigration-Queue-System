@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./BookingPage.css";
+import BackHomeButtons from "../components/BackHomeButtons";
 
 const API_URL = "http://localhost:5000/api/appointments";
 
@@ -132,9 +133,7 @@ export default function BookingPage() {
   return (
     <div className="booking-page">
       <section className="booking-intro">
-        <Link to="/" className="back-home">
-          ← Back to home
-        </Link>
+        <BackHomeButtons />
 
         <span className="section-eyebrow">APPOINTMENT SERVICES</span>
 
