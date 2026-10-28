@@ -47,6 +47,10 @@ function App() {
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
+  const [walkInTickets, setWalkInTickets] = useState([]);
+  const [walkInLoading, setWalkInLoading] = useState(false);
+  const [walkInError, setWalkInError] = useState("");
+  const [walkInNotice, setWalkInNotice] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
@@ -116,6 +120,28 @@ function App() {
     }
   }, [authenticatedFetch]);
 
+  const loadWalkInTickets = useCallback(async () => {
+    setWalkInLoading(true);
+    setWalkInError("");
+
+    try {
+      const response = await authenticatedFetch(
+        "http://localhost:5000/api/walk-ins"
+      );
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not load walk-in tickets.");
+      }
+
+      setWalkInTickets(result);
+    } catch (err) {
+      setWalkInError(err.message || "Could not load walk-in tickets.");
+    } finally {
+      setWalkInLoading(false);
+    }
+  }, [authenticatedFetch]);
+
   useEffect(() => {
     if (!localStorage.getItem("staffToken")) {
       navigate("/staff/login", { replace: true });
@@ -123,7 +149,8 @@ function App() {
     }
 
     loadAppointments();
-  }, [navigate, loadAppointments]);
+    loadWalkInTickets();
+  }, [navigate, loadAppointments, loadWalkInTickets]);
 
   function handleLogout() {
     localStorage.removeItem("staffToken");
@@ -238,6 +265,33 @@ function App() {
       await loadAppointments();
     } catch (err) {
       setError(err.message || "Status update failed.");
+    }
+  }
+
+  async function updateWalkInStatus(ticketId, status) {
+    setWalkInError("");
+    setWalkInNotice("");
+
+    try {
+      const response = await authenticatedFetch(
+        `http://localhost:5000/api/walk-ins/${ticketId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not update ticket status.");
+      }
+
+      setWalkInNotice(`${result.ticket.ticketNumber} updated to ${status}.`);
+      await loadWalkInTickets();
+    } catch (err) {
+      setWalkInError(err.message || "Could not update ticket status.");
     }
   }
 
@@ -369,6 +423,9 @@ function App() {
           </a>
           <a className="nav-item" href="#appointments">
             <span className="nav-symbol">≡</span>Appointments
+          </a>
+          <a className="nav-item" href="#walk-in-queue">
+            <span className="nav-symbol">↗</span>Walk-in queue
           </a>
           <a className="nav-item" href="#appointment-form">
             <span className="nav-symbol">＋</span>Register applicant
@@ -552,6 +609,101 @@ function App() {
               </table>
             </div>
           )}
+        </section>
+
+        <section className="work-section appointments-section" id="walk-in-queue">
+          <div className="section-heading">
+            <div>
+              <div className="section-kicker">WALK-IN OPERATIONS</div>
+              <h2>Walk-in queue management</h2>
+              <p>Call visitors, update ticket status, and monitor today's walk-in queue.</p>
+            </div>
+            <button
+              className="quiet-button"
+              type="button"
+              onClick={loadWalkInTickets}
+              disabled={walkInLoading}
+            >
+              {walkInLoading ? "Refreshing…" : "Refresh walk-ins"}
+            </button>
+          </div>
+
+          {walkInError && (
+            <div className="message message-error" role="alert">
+              {walkInError}
+            </div>
+          )}
+          {walkInNotice && (
+            <div className="message message-success" role="status">
+              {walkInNotice}
+            </div>
+          )}
+
+          {walkInLoading ? (
+            <div className="table-message">Loading walk-in tickets…</div>
+          ) : walkInTickets.length === 0 ? (
+            <div className="table-message empty-queue">
+              <strong>No walk-in tickets for today</strong>
+              <span>Register a visitor from the Walk-in Queue page to see the ticket here.</span>
+            </div>
+          ) : (
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Ticket</th>
+                    <th>Applicant</th>
+                    <th>Service</th>
+                    <th>Office</th>
+                    <th>Priority</th>
+                    <th>Status / action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {walkInTickets.map((ticket) => (
+                    <tr key={ticket._id}>
+                      <td>
+                        <span className="inline-queue">{ticket.ticketNumber}</span>
+                      </td>
+                      <td>
+                        <div className="applicant-cell">
+                          <strong>{ticket.applicantName}</strong>
+                          <small>Registered {formatTime(ticket.createdAt)}</small>
+                        </div>
+                      </td>
+                      <td>{ticket.serviceType}</td>
+                      <td>{ticket.office}</td>
+                      <td>
+                        <span className={`status-label ${ticket.priority === "Priority" ? "pending" : "approved"}`}>
+                          {ticket.priority}
+                        </span>
+                      </td>
+                      <td>
+                        <label className="status-editor">
+                          <span className="visually-hidden">
+                            Status for ticket {ticket.ticketNumber}
+                          </span>
+                          <select
+                            className={`status-select ${ticket.status === "Serving" ? "approved" : ticket.status === "Completed" ? "completed" : ticket.status === "Cancelled" ? "cancelled" : "pending"}`}
+                            value={ticket.status}
+                            onChange={(event) => updateWalkInStatus(ticket._id, event.target.value)}
+                          >
+                            <option value="Waiting">Waiting</option>
+                            <option value="Serving">Serving</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </label>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="table-footnote">
+            {walkInTickets.length} walk-in ticket{walkInTickets.length === 1 ? "" : "s"} for today.
+          </div>
         </section>
 
         <section className="work-section appointments-section" id="appointments">
