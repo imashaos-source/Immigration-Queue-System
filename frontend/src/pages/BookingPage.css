@@ -578,3 +578,11 @@
   color: #172b45;
   opacity: 1;
 }
+
+.booking-reference {
+  color: #1d4169;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}

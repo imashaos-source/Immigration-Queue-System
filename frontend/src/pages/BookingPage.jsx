@@ -175,6 +175,15 @@ export default function BookingPage() {
             </p>
 
             <div className="result-details">
+              {confirmation.bookingReference && (
+                <>
+                  <span>Booking reference</span>
+                  <strong className="booking-reference">
+                    {confirmation.bookingReference}
+                  </strong>
+                </>
+              )}
+
               <span>Applicant</span>
               <strong>
                 {confirmation.applicantName || "Request received"}
