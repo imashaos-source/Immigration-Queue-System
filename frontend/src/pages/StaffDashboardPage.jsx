@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-const API_URL = "http://localhost:5000/api/appointments";
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/appointments`;
 
 const emptyForm = {
   applicantName: "",
@@ -126,7 +126,7 @@ function App() {
 
     try {
       const response = await authenticatedFetch(
-        "http://localhost:5000/api/walk-ins"
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/walk-ins`
       );
       const result = await response.json();
 
@@ -274,7 +274,7 @@ function App() {
 
     try {
       const response = await authenticatedFetch(
-        `http://localhost:5000/api/walk-ins/${ticketId}/status`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/walk-ins/${ticketId}/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

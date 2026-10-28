@@ -7,7 +7,7 @@ const Appointment = require("../models/Appointment");
 const requireAuth = require("../middleware/authMiddleware");
 const crypto = require("crypto");
 
-// Helper: Get the appointment date in Sri Lankan local time (YYYY-MM-DD)
+// Get an appointment date in Sri Lankan local time (YYYY-MM-DD).
 function getQueueDate(dateValue) {
   const date = new Date(dateValue);
 
@@ -15,15 +15,25 @@ function getQueueDate(dateValue) {
     throw new Error("Invalid appointment date");
   }
 
-  return new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Colombo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(date);
+  }).formatToParts(date);
+
+  const values = {};
+
+  parts.forEach((part) => {
+    if (part.type !== "literal") {
+      values[part.type] = part.value;
+    }
+  });
+
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
-// PUBLIC CREATE - Applicants can submit appointment requests without login
+// PUBLIC: Applicants can submit appointment requests without login.
 router.post("/", async (req, res) => {
   try {
     const {
@@ -49,42 +59,66 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const bookingReference = `IMM-${new Date().getFullYear()}-${crypto
-  .randomBytes(4)
-  .toString("hex")
-  .toUpperCase()}`;
+    const validServices = [
+      "Passport Services",
+      "Visa Services",
+      "Residence Permit",
+      "Citizenship Services",
+      "Other",
+    ];
 
-const appointment = new Appointment({
-  applicantName: applicantName.trim(),
-  email: email.trim().toLowerCase(),
-  passportNumber: passportNumber.trim().toUpperCase(),
-  serviceType,
-  appointmentDate,
-  bookingReference,
-});
+    if (!validServices.includes(serviceType)) {
+      return res.status(400).json({
+        message: "Invalid service type.",
+      });
+    }
+
+    const parsedAppointmentDate = new Date(appointmentDate);
+
+    if (Number.isNaN(parsedAppointmentDate.getTime())) {
+      return res.status(400).json({
+        message: "Please provide a valid appointment date and time.",
+      });
+    }
+
+    const bookingReference = `IMM-${new Date().getFullYear()}-${crypto
+      .randomBytes(4)
+      .toString("hex")
+      .toUpperCase()}`;
+
+    const appointment = new Appointment({
+      applicantName: applicantName.trim(),
+      email: email.trim().toLowerCase(),
+      passportNumber: passportNumber.trim().toUpperCase(),
+      serviceType,
+      appointmentDate: parsedAppointmentDate,
+      bookingReference,
+    });
 
     const savedAppointment = await appointment.save();
 
     return res.status(201).json({
-      message: "Appointment created successfully",
+      message: "Appointment created successfully.",
       appointment: savedAppointment,
     });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({
         message:
-  "An appointment with this passport number or booking reference already exists.",
+          "An appointment with this passport number or booking reference already exists.",
       });
     }
 
+    console.error("Appointment creation error:", error.message);
+
     return res.status(400).json({
-      message: "Failed to create appointment",
+      message: "Failed to create appointment.",
       error: error.message,
     });
   }
 });
 
-/* PUBLIC - Check appointment status using booking reference and email */
+// PUBLIC: Check appointment status using booking reference and email.
 router.post("/check-status", async (req, res) => {
   try {
     const { bookingReference, email } = req.body;
@@ -119,6 +153,8 @@ router.post("/check-status", async (req, res) => {
       appointment,
     });
   } catch (error) {
+    console.error("Appointment status check error:", error.message);
+
     return res.status(500).json({
       message: "Unable to check appointment status. Please try again.",
     });
@@ -128,7 +164,7 @@ router.post("/check-status", async (req, res) => {
 // All routes below this line require staff authentication.
 router.use(requireAuth);
 
-// READ - Get all appointments (staff only)
+// STAFF: Get all appointments.
 router.get("/", async (req, res) => {
   try {
     const appointments = await Appointment.find().sort({
@@ -137,18 +173,20 @@ router.get("/", async (req, res) => {
 
     return res.json(appointments);
   } catch (error) {
+    console.error("Loading appointments:", error.message);
+
     return res.status(500).json({
-      message: "Failed to retrieve appointments",
+      message: "Failed to retrieve appointments.",
     });
   }
 });
 
-// READ - Get one appointment by ID (staff only)
+// STAFF: Get one appointment by ID.
 router.get("/:id", async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({
-        message: "Invalid appointment ID",
+        message: "Invalid appointment ID.",
       });
     }
 
@@ -156,24 +194,26 @@ router.get("/:id", async (req, res) => {
 
     if (!appointment) {
       return res.status(404).json({
-        message: "Appointment not found",
+        message: "Appointment not found.",
       });
     }
 
     return res.json(appointment);
   } catch (error) {
+    console.error("Retrieving appointment:", error.message);
+
     return res.status(500).json({
-      message: "Failed to retrieve appointment",
+      message: "Failed to retrieve appointment.",
     });
   }
 });
 
-// UPDATE - Edit an appointment and assign a daily queue number (staff only)
+// STAFF: Update appointment details, approval status, and queue status.
 router.put("/:id", async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({
-        message: "Invalid appointment ID",
+        message: "Invalid appointment ID.",
       });
     }
 
@@ -183,18 +223,61 @@ router.put("/:id", async (req, res) => {
 
     if (!existingAppointment) {
       return res.status(404).json({
-        message: "Appointment not found",
+        message: "Appointment not found.",
       });
     }
 
     const updates = { ...req.body };
 
-    // Prevent staff requests from directly setting queue fields.
+    // These fields are controlled by the backend.
     delete updates.queueNumber;
     delete updates.queueDate;
     delete updates._id;
     delete updates.createdAt;
     delete updates.updatedAt;
+
+    const validQueueStatuses = [
+      "Waiting",
+      "Serving",
+      "Completed",
+    ];
+
+    if (
+      updates.queueStatus !== undefined &&
+      !validQueueStatuses.includes(updates.queueStatus)
+    ) {
+      return res.status(400).json({
+        message: "Invalid appointment queue status.",
+      });
+    }
+
+    // A queue status can only be changed for an approved appointment.
+    const resultingAppointmentStatus =
+      updates.status ?? existingAppointment.status;
+
+    if (
+      updates.queueStatus !== undefined &&
+      resultingAppointmentStatus !== "Approved" &&
+      !(updates.queueStatus === "Completed" &&
+        resultingAppointmentStatus === "Completed")
+    ) {
+      return res.status(400).json({
+        message: "Only approved appointments can enter the service queue.",
+      });
+    }
+
+    // Keep booking status and live queue status coordinated.
+    if (updates.status === "Cancelled") {
+      updates.queueStatus = "Waiting";
+    }
+
+    if (updates.status === "Completed") {
+      updates.queueStatus = "Completed";
+    }
+
+    if (updates.queueStatus === "Completed") {
+      updates.status = "Completed";
+    }
 
     const requestedDate =
       updates.appointmentDate ?? existingAppointment.appointmentDate;
@@ -214,6 +297,16 @@ router.put("/:id", async (req, res) => {
       updates.queueDate = queueDate;
       updates.queueNumber =
         (lastQueuedAppointment?.queueNumber || 0) + 1;
+      updates.queueStatus = "Waiting";
+    }
+
+    // Keep the queue date consistent if an appointment date changes
+    // before the appointment has been approved.
+    if (
+      updates.appointmentDate !== undefined &&
+      existingAppointment.queueNumber == null
+    ) {
+      updates.queueDate = null;
     }
 
     const appointment = await Appointment.findByIdAndUpdate(
@@ -226,7 +319,7 @@ router.put("/:id", async (req, res) => {
     );
 
     return res.json({
-      message: "Appointment updated successfully",
+      message: "Appointment updated successfully.",
       appointment,
     });
   } catch (error) {
@@ -237,19 +330,21 @@ router.put("/:id", async (req, res) => {
       });
     }
 
+    console.error("Appointment update error:", error.message);
+
     return res.status(400).json({
-      message: "Failed to update appointment",
+      message: "Failed to update appointment.",
       error: error.message,
     });
   }
 });
 
-// DELETE - Remove an appointment (staff only)
+// ADMIN: Delete an appointment.
 router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({
-        message: "Invalid appointment ID",
+        message: "Invalid appointment ID.",
       });
     }
 
@@ -259,16 +354,18 @@ router.delete("/:id", requireAdmin, async (req, res) => {
 
     if (!appointment) {
       return res.status(404).json({
-        message: "Appointment not found",
+        message: "Appointment not found.",
       });
     }
 
     return res.json({
-      message: "Appointment deleted successfully",
+      message: "Appointment deleted successfully.",
     });
   } catch (error) {
+    console.error("Deleting appointment:", error.message);
+
     return res.status(500).json({
-      message: "Failed to delete appointment",
+      message: "Failed to delete appointment.",
     });
   }
 });

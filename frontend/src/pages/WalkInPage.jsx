@@ -3,7 +3,7 @@ import { useState } from "react";
 import "./WalkInPage.css";
 import BackHomeButtons from "../components/BackHomeButtons";
 
-const API_URL = "http://localhost:5000/api/walk-ins";
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/walk-ins`;
 
 const SERVICES = [
   "Passport Services",

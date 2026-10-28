@@ -147,3 +147,12 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local environment configuration
+.env.local
+
+# Environment secrets
+.env
+
+# Local backup copies
+*.backup

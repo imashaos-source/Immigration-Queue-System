@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import "./AppointmentStatusPage.css";
 import BackHomeButtons from "../components/BackHomeButtons";
 
-const API_URL = "http://localhost:5000/api/appointments/check-status";
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/appointments/check-status`;
 
 export default function AppointmentStatusPage() {
   const [bookingReference, setBookingReference] = useState("");

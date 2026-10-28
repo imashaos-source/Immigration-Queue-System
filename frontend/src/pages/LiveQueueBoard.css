@@ -227,6 +227,123 @@
   font-weight: 700;
 }
 
+.live-ticket-type {
+  padding: 4px 9px;
+  border-radius: 4px;
+  background: #edf3fa;
+  color: #2c527a;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Next appointment section */
+
+.next-appointment-section {
+  border-top: 3px solid #c4a76a;
+}
+
+.next-appointment-card {
+  padding: 22px;
+  border: 1px solid #e4dfd4;
+  border-radius: 7px;
+  background: #fbf8f0;
+}
+
+.next-appointment-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #e4dfd4;
+}
+
+.next-appointment-label {
+  color: #806329;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.next-appointment-heading strong {
+  color: #102b4e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  letter-spacing: 1px;
+}
+
+.next-appointment-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.next-appointment-details > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.next-appointment-details span {
+  color: #718096;
+  font-size: 11px;
+}
+
+.next-appointment-details strong {
+  color: #23364d;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.next-appointment-note {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid #c4a76a;
+  background: #fffefa;
+  color: #52647a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* Overdue appointment styles */
+
+.next-appointment-section.has-overdue {
+  border-top-color: #b54a43;
+}
+
+.overdue-appointments-list {
+  display: grid;
+  gap: 14px;
+}
+
+.overdue-appointment-card {
+  border-color: #edcccc;
+  background: #fcf4f2;
+}
+
+.overdue-label {
+  color: #a33b32;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.overdue-note {
+  border-left-color: #b54a43;
+}
+
+/* Waiting queue table */
+
+.live-board-section-description {
+  margin: -8px 0 18px;
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
 .live-board-table-wrap {
   width: 100%;
   max-width: 100%;
@@ -304,6 +421,8 @@
   color: #2c527a;
 }
 
+/* Loading, empty and error states */
+
 .live-board-empty {
   display: flex;
   min-height: 90px;
@@ -342,6 +461,8 @@
   text-align: center;
 }
 
+/* Responsive layout */
+
 @media (max-width: 700px) {
   .live-board-page {
     padding: 32px 16px 24px;
@@ -377,6 +498,19 @@
   .live-board-table th,
   .live-board-table td {
     padding: 12px 10px;
+  }
+
+  .next-appointment-card {
+    padding: 17px;
+  }
+
+  .next-appointment-details {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .next-appointment-heading strong {
+    font-size: 26px;
   }
 }
 

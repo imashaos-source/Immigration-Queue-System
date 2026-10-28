@@ -59,9 +59,15 @@ const appointmentSchema = new mongoose.Schema(
       default: null
     },
 
-    queueDate: {
+        queueDate: {
       type: String,
       default: null
+    },
+
+    queueStatus: {
+      type: String,
+      enum: ["Waiting", "Serving", "Completed"],
+      default: "Waiting"
     }
   },
   { timestamps: true }
