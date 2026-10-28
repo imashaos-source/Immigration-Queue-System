@@ -15,14 +15,22 @@ export default function PublicLayout() {
         </Link>
 
         <nav className="public-nav" aria-label="Main navigation">
-          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/" end>
+            Home
+          </NavLink>
+
           <a href="/#services">Services</a>
+
           <a href="/#process">How it works</a>
+
+          <NavLink to="/book">Book appointment</NavLink>
+
+          <NavLink to="/walk-in">Join queue</NavLink>
+
+          <NavLink to="/live-board">Live board</NavLink>
+
           <Link to="/staff/login" className="staff-link">
             Staff login
-          </Link>
-          <Link to="/book" className="nav-book-button">
-            Book appointment
           </Link>
         </nav>
       </header>

@@ -11,6 +11,8 @@ import HomePage from "./pages/HomePage";
 import BookingPage from "./pages/BookingPage";
 import StaffLoginPage from "./pages/StaffLoginPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
+import WalkInPage from "./pages/WalkInPage";
+import LiveQueueBoard from "./pages/LiveQueueBoard";
 
 export default function App() {
   return (
@@ -38,6 +40,9 @@ export default function App() {
           path="*"
           element={<Navigate to="/" replace />}
         />
+
+        <Route path="/walk-in" element={<WalkInPage />} />
+        <Route path="/live-board" element={<LiveQueueBoard />} />
       </Routes>
     </BrowserRouter>
   );

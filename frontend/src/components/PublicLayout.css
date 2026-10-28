@@ -1,50 +1,60 @@
 
-/* =========================================
-   PUBLIC WEBSITE HEADER AND FOOTER
-   Navy, white and muted gold
-   ========================================= */
+:root {
+  --brand-navy: #102b4e;
+  --brand-navy-light: #1d4169;
+  --brand-gold: #c4a76a;
+  --brand-gold-dark: #8a6c32;
+  --brand-ivory: #f7f5ef;
+  --brand-white: #fffefa;
+  --brand-text: #23364d;
+  --brand-muted: #718096;
+  --brand-border: #e4dfd4;
+}
 
 .public-site {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  color: #18324f;
+  background: var(--brand-ivory);
+  color: var(--brand-text);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .public-header {
   position: relative;
   z-index: 10;
   display: flex;
-  min-height: 86px;
+  min-height: 82px;
   align-items: center;
   justify-content: space-between;
   gap: 28px;
-  padding: 16px max(32px, calc((100% - 1180px) / 2));
-  border-bottom: 1px solid #e3e8ef;
-  background: #ffffff;
+  padding: 15px max(32px, calc((100% - 1180px) / 2));
+  border-bottom: 1px solid var(--brand-border);
+  background: var(--brand-white);
+  box-shadow: 0 2px 10px rgba(16, 43, 78, 0.025);
 }
 
 .public-brand {
   display: inline-flex;
-  min-width: 250px;
+  min-width: 230px;
   align-items: center;
   gap: 13px;
-  color: #102b4e;
+  color: var(--brand-navy);
   text-decoration: none;
 }
 
 .public-brand-mark {
-  width: 46px;
-  height: 46px;
-  flex-shrink: 0;
   display: grid;
+  width: 45px;
+  height: 45px;
+  flex-shrink: 0;
   place-items: center;
-  border: 1px solid #c9ad70;
+  border: 1px solid var(--brand-gold);
   border-radius: 5px;
-  background: #102b4e;
-  color: #ffffff;
+  background: var(--brand-navy);
+  color: #fff;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 18px;
   font-weight: 700;
@@ -53,18 +63,18 @@
 .public-brand-copy {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .public-brand-copy strong {
-  color: #102b4e;
-  font-size: 17px;
+  color: var(--brand-navy);
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .public-brand-copy small {
-  color: #69788a;
+  color: var(--brand-muted);
   font-size: 11px;
   line-height: 1.4;
 }
@@ -73,29 +83,66 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 25px;
+  flex-wrap: wrap;
+  gap: 9px;
 }
 
 .public-nav > a {
+  display: inline-flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 11px;
+  border-radius: 5px;
   color: #465971;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   text-decoration: none;
-  transition: color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
 .public-nav > a:hover,
 .public-nav > a.active {
-  color: #a17d36;
+  background: #f4efe4;
+  color: var(--brand-gold-dark);
 }
 
 .public-nav .staff-link {
-  color: #173858;
+  border: 1px solid #1d4169;
+  background: #1d4169;
+  color: #ffffff;
+}
+
+.public-nav .staff-link:hover {
+  border-color: #102b4e;
+  background: #102b4e;
+  color: #ffffff;
+}
+
+.public-nav .staff-link:hover {
+  border-color: var(--brand-gold);
+  background: #f4efe4;
+}
+
+.public-nav .nav-book-button {
+  border: 1px solid var(--brand-navy);
+  background: var(--brand-navy);
+  color: #fff;
+}
+
+.public-nav .nav-book-button:hover {
+  border-color: var(--brand-navy-light);
+  background: var(--brand-navy-light);
+  color: #fff;
 }
 
 .public-main {
-  flex: 1;
   width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .public-footer {
@@ -103,35 +150,34 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 32px max(32px, calc((100% - 1180px) / 2));
-  border-top: 1px solid #e3e8ef;
-  background: #f6f8fb;
+  padding: 27px max(32px, calc((100% - 1180px) / 2));
+  border-top: 1px solid var(--brand-border);
+  background: var(--brand-white);
 }
 
 .public-footer strong {
-  color: #102b4e;
-  font-size: 15px;
+  color: var(--brand-navy);
+  font-size: 14px;
 }
 
 .public-footer p {
-  margin: 7px 0 0;
-  color: #68788d;
-  font-size: 13px;
+  margin: 5px 0 0;
+  color: var(--brand-muted);
+  font-size: 12px;
 }
 
 .public-footer > span {
   color: #778599;
-  font-size: 12px;
+  font-size: 11px;
   text-align: right;
 }
 
-/* Responsive navigation */
-
-@media (max-width: 900px) {
+/* Tablet and smaller screens */
+@media (max-width: 1000px) {
   .public-header {
     flex-wrap: wrap;
-    gap: 18px;
-    padding: 18px 24px;
+    gap: 14px;
+    padding: 16px 24px;
   }
 
   .public-brand {
@@ -140,19 +186,18 @@
 
   .public-nav {
     width: 100%;
-    flex-wrap: wrap;
     justify-content: flex-start;
-    gap: 18px;
+    gap: 6px;
   }
 
   .public-footer {
-    padding: 28px 24px;
+    padding: 25px 24px;
   }
 }
 
 @media (max-width: 520px) {
   .public-header {
-    padding: 16px 18px;
+    padding: 15px 16px;
   }
 
   .public-brand-mark {
@@ -161,7 +206,7 @@
   }
 
   .public-brand-copy strong {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .public-brand-copy small {
@@ -169,18 +214,20 @@
   }
 
   .public-nav {
-    gap: 14px;
+    gap: 4px;
   }
 
   .public-nav > a {
-    font-size: 13px;
+    min-height: 35px;
+    padding: 7px 8px;
+    font-size: 11px;
   }
 
   .public-footer {
     align-items: flex-start;
     flex-direction: column;
-    gap: 14px;
-    padding: 26px 18px;
+    gap: 12px;
+    padding: 23px 16px;
   }
 
   .public-footer > span {
