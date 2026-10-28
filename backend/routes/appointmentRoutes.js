@@ -5,6 +5,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Appointment = require("../models/Appointment");
 const requireAuth = require("../middleware/authMiddleware");
+const crypto = require("crypto");
 
 // Helper: Get the appointment date in Sri Lankan local time (YYYY-MM-DD)
 function getQueueDate(dateValue) {
@@ -48,13 +49,19 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const appointment = new Appointment({
-      applicantName: applicantName.trim(),
-      email: email.trim().toLowerCase(),
-      passportNumber: passportNumber.trim().toUpperCase(),
-      serviceType,
-      appointmentDate,
-    });
+    const bookingReference = `IMM-${new Date().getFullYear()}-${crypto
+  .randomBytes(4)
+  .toString("hex")
+  .toUpperCase()}`;
+
+const appointment = new Appointment({
+  applicantName: applicantName.trim(),
+  email: email.trim().toLowerCase(),
+  passportNumber: passportNumber.trim().toUpperCase(),
+  serviceType,
+  appointmentDate,
+  bookingReference,
+});
 
     const savedAppointment = await appointment.save();
 
@@ -66,13 +73,54 @@ router.post("/", async (req, res) => {
     if (error.code === 11000) {
       return res.status(409).json({
         message:
-          "An appointment with this passport number or queue number already exists.",
+  "An appointment with this passport number or booking reference already exists.",
       });
     }
 
     return res.status(400).json({
       message: "Failed to create appointment",
       error: error.message,
+    });
+  }
+});
+
+/* PUBLIC - Check appointment status using booking reference and email */
+router.post("/check-status", async (req, res) => {
+  try {
+    const { bookingReference, email } = req.body;
+
+    if (
+      typeof bookingReference !== "string" ||
+      !bookingReference.trim() ||
+      typeof email !== "string" ||
+      !email.trim()
+    ) {
+      return res.status(400).json({
+        message: "Please provide your booking reference and email address.",
+      });
+    }
+
+    const appointment = await Appointment.findOne({
+      bookingReference: bookingReference.trim().toUpperCase(),
+      email: email.trim().toLowerCase(),
+    }).select(
+      "bookingReference applicantName serviceType appointmentDate status queueNumber queueDate"
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        message:
+          "No appointment was found with those details. Please check your reference and email address.",
+      });
+    }
+
+    return res.json({
+      message: "Appointment found successfully.",
+      appointment,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Unable to check appointment status. Please try again.",
     });
   }
 });

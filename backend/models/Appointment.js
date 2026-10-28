@@ -24,6 +24,13 @@ const appointmentSchema = new mongoose.Schema(
       unique: true
     },
 
+    bookingReference: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true
+    },
+
     serviceType: {
       type: String,
       required: true,
