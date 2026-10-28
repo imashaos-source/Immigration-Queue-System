@@ -52,6 +52,14 @@ function App() {
   const [walkInError, setWalkInError] = useState("");
   const [walkInNotice, setWalkInNotice] = useState("");
   const [form, setForm] = useState(emptyForm);
+  const [walkInForm, setWalkInForm] = useState({
+    applicantName: "",
+    serviceType: "Passport Services",
+    office: "",
+    priority: "Normal",
+  });
+  const [walkInSaving, setWalkInSaving] = useState(false);
+  const [walkInConfirmationTicket, setWalkInConfirmationTicket] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -161,6 +169,52 @@ function App() {
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
+  }
+
+  async function handleWalkInSubmit(event) {
+    event.preventDefault();
+    setWalkInSaving(true);
+    setWalkInError("");
+    setWalkInNotice("");
+    setWalkInConfirmationTicket(null);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await authenticatedFetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/walk-ins`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(walkInForm),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not register the walk-in visitor.");
+      }
+
+      const createdTicket = result.ticket || result;
+      setWalkInConfirmationTicket(createdTicket);
+      setWalkInNotice(
+        createdTicket?.ticketNumber
+          ? `Walk-in registered successfully. Ticket number: ${createdTicket.ticketNumber}.`
+          : "Walk-in registered successfully."
+      );
+      setWalkInForm({
+        applicantName: "",
+        serviceType: "Passport Services",
+        office: "",
+        priority: "Normal",
+      });
+      await loadWalkInTickets();
+    } catch (err) {
+      setWalkInError(err.message || "Could not register the walk-in visitor.");
+    } finally {
+      setWalkInSaving(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -428,7 +482,7 @@ function App() {
             <span className="nav-symbol">↗</span>Walk-in queue
           </a>
           <a className="nav-item" href="#appointment-form">
-            <span className="nav-symbol">＋</span>Register applicant
+            <span className="nav-symbol">＋</span>Register walk-in
           </a>
         </nav>
 
@@ -473,7 +527,7 @@ function App() {
                 ?.scrollIntoView({ behavior: "smooth", block: "start" })
             }
           >
-            <span aria-hidden="true">＋</span> Register appointment
+            <span aria-hidden="true">＋</span> Register walk-in
           </button>
         </header>
 
@@ -854,6 +908,7 @@ function App() {
           </div>
         </section>
 
+        {editingId ? (
         <section className="work-section form-section" id="appointment-form">
           <div className="section-heading">
             <div>
@@ -981,6 +1036,186 @@ function App() {
             system when an appointment is approved.
           </p>
         </section>
+        ) : (
+        <section className="work-section form-section" id="appointment-form">
+          <div className="section-heading">
+            <div>
+              <div className="section-kicker">NEW WALK-IN</div>
+              <h2>Register a walk-in visitor</h2>
+              <p>Enter the visitor's details to issue a queue ticket.</p>
+            </div>
+          </div>
+
+          {walkInError && (
+            <div className="message message-error" role="alert">
+              {walkInError}
+            </div>
+          )}
+          {walkInNotice && (
+            <div className="message message-success" role="status">
+              {walkInNotice}
+            </div>
+          )}
+
+          {walkInConfirmationTicket && (
+            <section className="walkin-ticket-confirmation" aria-live="polite">
+              <style>{`
+                @media print {
+                  body * { visibility: hidden !important; }
+                  .walkin-ticket-print,
+                  .walkin-ticket-print * { visibility: visible !important; }
+                  .walkin-ticket-print {
+                    position: absolute !important;
+                    inset: 0 auto auto 0 !important;
+                    width: 100% !important;
+                    max-width: 520px !important;
+                    margin: 24px !important;
+                    background: #ffffff !important;
+                    color: #102b4e !important;
+                    box-shadow: none !important;
+                    border: 1px solid #b9c7d8 !important;
+                  }
+                  .walkin-ticket-print button { display: none !important; }
+                }
+              `}</style>
+              <div className="walkin-ticket-print" style={{
+                border: "1px solid #d7e0eb",
+                borderRadius: "12px",
+                background: "#f5f8fc",
+                padding: "24px",
+                margin: "20px 0",
+                maxWidth: "520px",
+                color: "#102b4e",
+                textAlign: "center"
+              }}>
+                <p style={{ margin: "0 0 8px", color: "#8a6c32", fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px" }}>
+                  IMMIGRATION QUEUE MANAGEMENT
+                </p>
+                <h3 style={{ margin: "0 0 8px", fontSize: "22px" }}>
+                  Walk-in registration successful
+                </h3>
+                <p style={{ margin: "0 0 4px", color: "#63748a" }}>Please keep your queue ticket number</p>
+                <div style={{ fontSize: "42px", fontWeight: 800, letterSpacing: "2px", margin: "8px 0 18px" }}>
+                  {walkInConfirmationTicket.ticketNumber || "Ticket issued"}
+                </div>
+                <div style={{ textAlign: "left", borderTop: "1px solid #d7e0eb", paddingTop: "14px" }}>
+                  <p><strong>Visitor:</strong> {walkInConfirmationTicket.applicantName || walkInForm.applicantName || "Registered visitor"}</p>
+                  <p><strong>Service:</strong> {walkInConfirmationTicket.serviceType || walkInForm.serviceType}</p>
+                  <p><strong>Office:</strong> {walkInConfirmationTicket.office || walkInForm.office}</p>
+                  <p><strong>Priority:</strong> {walkInConfirmationTicket.priority || walkInForm.priority || "Normal"}</p>
+                  <p><strong>Status:</strong> {walkInConfirmationTicket.status || "Waiting"}</p>
+                </div>
+                <p style={{ margin: "16px 0", color: "#52657c", fontSize: "13px" }}>
+                  Please watch the live queue board and wait until your ticket is called.
+                </p>
+                <button
+                  className="primary-action"
+                  type="button"
+                  onClick={() => window.print()}
+                >
+                  Print ticket
+                </button>
+              </div>
+            </section>
+          )}
+
+          <form className="appointment-form" onSubmit={handleWalkInSubmit}>
+            <div className="form-field">
+              <label htmlFor="walkInApplicantName">
+                Visitor name <span>*</span>
+              </label>
+              <input
+                id="walkInApplicantName"
+                name="applicantName"
+                value={walkInForm.applicantName}
+                onChange={(event) =>
+                  setWalkInForm((previous) => ({
+                    ...previous,
+                    applicantName: event.target.value,
+                  }))
+                }
+                placeholder="Full name"
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="walkInServiceType">
+                Service required <span>*</span>
+              </label>
+              <select
+                id="walkInServiceType"
+                name="serviceType"
+                value={walkInForm.serviceType}
+                onChange={(event) =>
+                  setWalkInForm((previous) => ({
+                    ...previous,
+                    serviceType: event.target.value,
+                  }))
+                }
+                required
+              >
+                <option>Passport Services</option>
+                <option>Visa Services</option>
+                <option>Residence Permit</option>
+                <option>Citizenship Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="walkInOffice">
+                Office / branch <span>*</span>
+              </label>
+              <input
+                id="walkInOffice"
+                name="office"
+                value={walkInForm.office}
+                onChange={(event) =>
+                  setWalkInForm((previous) => ({
+                    ...previous,
+                    office: event.target.value,
+                  }))
+                }
+                placeholder="e.g. Colombo"
+                required
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="walkInPriority">Queue priority</label>
+              <select
+                id="walkInPriority"
+                name="priority"
+                value={walkInForm.priority}
+                onChange={(event) =>
+                  setWalkInForm((previous) => ({
+                    ...previous,
+                    priority: event.target.value,
+                  }))
+                }
+              >
+                <option value="Normal">Normal</option>
+                <option value="Priority">Priority</option>
+              </select>
+            </div>
+
+            <div className="form-actions">
+              <button
+                className="primary-action"
+                type="submit"
+                disabled={walkInSaving}
+              >
+                {walkInSaving ? "Issuing ticket…" : "Register walk-in & issue ticket"}
+              </button>
+            </div>
+          </form>
+
+          <p className="form-note">
+            <span>*</span> Required fields. The system generates the queue ticket automatically.
+          </p>
+        </section>
+        )}
 
         <footer className="page-footer">
           <span>Immigration Appointment &amp; Queue Management System</span>

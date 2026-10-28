@@ -789,3 +789,125 @@
     padding-left: clamp(56px, 5.5vw, 100px);
   }
 }
+
+/* HOMEPAGE HERO — FIT THE FIRST SCREEN */
+@media (min-width: 1001px) {
+  .home-page .home-hero {
+    min-height: 0;
+    gap: clamp(24px, 3vw, 48px);
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .home-page .hero-content {
+    padding: 0;
+  }
+
+  .home-page .home-eyebrow {
+    margin-bottom: 18px;
+  }
+
+  .home-page .hero-content h1 {
+    font-size: clamp(40px, 4vw, 58px);
+    line-height: 1.05;
+    margin-bottom: 18px;
+  }
+
+  .home-page .hero-description {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .home-page .hero-actions {
+    gap: 18px;
+    margin-top: 22px;
+  }
+
+  .home-page .hero-note {
+    margin-top: 22px;
+    padding-top: 14px;
+    line-height: 1.6;
+  }
+
+  .home-page .hero-side {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .home-page .hero-illustration {
+    height: clamp(260px, 33vw, 390px);
+    min-height: 0;
+    margin: 12px 0;
+  }
+
+  .home-page .hero-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .home-page .hero-side-bottom {
+    padding-top: 14px;
+  }
+
+  .home-page .hero-side-bottom p {
+    line-height: 1.6;
+  }
+}
+
+/* NAVY BLUE SERVICE CARDS */
+.home-page .service-item {
+  background: #102b4e;
+  border-color: #102b4e;
+  box-shadow: 0 8px 22px rgb(16 43 78 / 10%);
+}
+
+.home-page .service-number {
+  color: #d9bd83;
+}
+
+.home-page .service-item h3 {
+  color: #ffffff;
+}
+
+.home-page .service-item p {
+  color: #dce5f0;
+}
+
+.home-page .service-item > a {
+  color: #ffffff;
+}
+
+.home-page .service-item > a:hover {
+  color: #e2c78e;
+}
+
+.home-page .service-item:hover {
+  background: #173b63;
+  border-color: #d9bd83;
+  box-shadow: 0 12px 28px rgb(16 43 78 / 18%);
+  transform: translateY(-4px);
+}
+
+/* SUBTLE COLOUR ACCENTS */
+.home-page .process-section {
+  background: #f1f5fa;
+}
+
+.home-page .process-step {
+  border-bottom-color: #dce4ee;
+}
+
+.home-page .process-step > span {
+  background: #ffffff;
+  border-color: #c4a76a;
+}
+
+.home-page .home-cta {
+  background: #fbf8f1;
+  border-color: #e8dcc3;
+  box-shadow: none;
+}

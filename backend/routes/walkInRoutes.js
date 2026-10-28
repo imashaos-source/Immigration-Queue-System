@@ -7,6 +7,7 @@ const requireAuth = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+// Use Sri Lankan local dates so tickets reset according to Sri Lankan time.
 function getQueueDate(dateValue = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Colombo",
@@ -24,6 +25,29 @@ function getQueueDate(dateValue = new Date()) {
   });
 
   return `${values.year}-${values.month}-${values.day}`;
+}
+
+// Find the next available ticket number for a particular date.
+// Example: W-001, W-002, W-003.
+async function getNextWalkInTicketNumber(queueDate) {
+  const tickets = await WalkInTicket.find({ queueDate })
+    .select("ticketNumber")
+    .lean();
+
+  let highestNumber = 0;
+
+  for (const ticket of tickets) {
+    const match = /^W-(\d+)$/.exec(ticket.ticketNumber || "");
+
+    if (match) {
+      highestNumber = Math.max(
+        highestNumber,
+        Number.parseInt(match[1], 10)
+      );
+    }
+  }
+
+  return `W-${String(highestNumber + 1).padStart(3, "0")}`;
 }
 
 // PUBLIC: Combined live queue for today's walk-ins and appointments.
@@ -44,8 +68,7 @@ router.get("/board", async (req, res) => {
       .sort({ createdAt: 1 })
       .lean();
 
-    // Include approved appointments that are still in the live queue.
-    // Older appointment records without queueStatus are treated as Waiting.
+    // Include approved appointments still in today's live queue.
     const appointmentFilter = {
       status: "Approved",
       queueDate,
@@ -62,13 +85,13 @@ router.get("/board", async (req, res) => {
       )
       .lean();
 
-    // Never return applicant names, email addresses, or passport numbers
-    // from this public endpoint.
+    // Do not expose applicants' names, email addresses, or passport numbers.
     const publicAppointments = appointments.map((appointment) => ({
       _id: `appointment-${appointment._id}`,
       type: "Appointment",
-      ticketNumber:
-        `A-${String(appointment.queueNumber ?? 0).padStart(3, "0")}`,
+      ticketNumber: `A-${String(
+        appointment.queueNumber ?? 0
+      ).padStart(3, "0")}`,
       serviceType: appointment.serviceType,
       office: "Online Appointments",
       priority: "Normal",
@@ -89,25 +112,36 @@ router.get("/board", async (req, res) => {
       createdAt: ticket.createdAt,
     }));
 
-    // Keep the current serving ticket visible first, then list waiting
-    // tickets. Appointment times are retained for the scheduled-next panel.
+    // Show serving tickets first, followed by the waiting queue.
     const tickets = [
       ...publicWalkIns,
       ...publicAppointments,
     ].sort((a, b) => {
-      if (a.status === "Serving" && b.status !== "Serving") return -1;
-      if (b.status === "Serving" && a.status !== "Serving") return 1;
+      if (a.status === "Serving" && b.status !== "Serving") {
+        return -1;
+      }
 
-      if (a.type === "Appointment" && b.type === "Appointment") {
-        return new Date(a.appointmentTime) - new Date(b.appointmentTime);
+      if (b.status === "Serving" && a.status !== "Serving") {
+        return 1;
+      }
+
+      if (
+        a.type === "Appointment" &&
+        b.type === "Appointment"
+      ) {
+        return (
+          new Date(a.appointmentTime) -
+          new Date(b.appointmentTime)
+        );
       }
 
       if (a.type === "WalkIn" && b.type === "WalkIn") {
-        return new Date(a.createdAt) - new Date(b.createdAt);
+        return (
+          new Date(a.createdAt) - new Date(b.createdAt)
+        );
       }
 
-      // Mixed types are displayed together; the staff workflow will
-      // determine which customer should actually be served next.
+      // Display appointments before walk-ins when types are mixed.
       if (a.type === "Appointment") return -1;
       if (b.type === "Appointment") return 1;
 
@@ -116,35 +150,45 @@ router.get("/board", async (req, res) => {
 
     const now = new Date();
 
-const waitingAppointments = publicAppointments
-  .filter((appointment) => appointment.status === "Waiting")
-  .sort(
-    (a, b) =>
-      new Date(a.appointmentTime) - new Date(b.appointmentTime)
-  );
+    const waitingAppointments = publicAppointments
+      .filter(
+        (appointment) => appointment.status === "Waiting"
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.appointmentTime) -
+          new Date(b.appointmentTime)
+      );
 
-const nextAppointment =
-  waitingAppointments.find(
-    (appointment) =>
-      new Date(appointment.appointmentTime) >= now
-  ) || null;
+    const nextAppointment =
+      waitingAppointments.find(
+        (appointment) =>
+          new Date(appointment.appointmentTime) >= now
+      ) || null;
 
-const overdueAppointments = waitingAppointments.filter(
-  (appointment) =>
-    new Date(appointment.appointmentTime) < now
-);
+    const overdueAppointments = waitingAppointments.filter(
+      (appointment) =>
+        new Date(appointment.appointmentTime) < now
+    );
 
     res.json({
       date: queueDate,
       tickets,
-      serving: tickets.filter((ticket) => ticket.status === "Serving"),
-      waiting: tickets.filter((ticket) => ticket.status === "Waiting"),
+      serving: tickets.filter(
+        (ticket) => ticket.status === "Serving"
+      ),
+      waiting: tickets.filter(
+        (ticket) => ticket.status === "Waiting"
+      ),
       nextAppointment,
-overdueAppointments,
-serverTime: now.toISOString(),
+      overdueAppointments,
+      serverTime: now.toISOString(),
     });
   } catch (error) {
-    console.error("Loading public combined queue:", error.message);
+    console.error(
+      "Loading public combined queue:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Could not load the live queue.",
@@ -166,7 +210,10 @@ router.get("/", async (req, res) => {
 
     res.json(tickets);
   } catch (error) {
-    console.error("Loading staff walk-in tickets:", error.message);
+    console.error(
+      "Loading staff walk-in tickets:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Could not load walk-in tickets.",
@@ -174,10 +221,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-// STAFF: Register a walk-in visitor and issue a ticket.
+// STAFF: Register a walk-in visitor and issue a daily ticket.
 router.post("/", async (req, res) => {
   try {
-    const { applicantName, serviceType, office, priority } = req.body;
+    const { applicantName, serviceType, office, priority } =
+      req.body;
 
     if (
       typeof applicantName !== "string" ||
@@ -187,7 +235,8 @@ router.post("/", async (req, res) => {
       !office.trim()
     ) {
       return res.status(400).json({
-        message: "Applicant name, service, and office are required.",
+        message:
+          "Applicant name, service, and office are required.",
       });
     }
 
@@ -214,12 +263,22 @@ router.post("/", async (req, res) => {
       });
     }
 
+    if (
+      !req.staff ||
+      !mongoose.isValidObjectId(req.staff.id)
+    ) {
+      return res.status(401).json({
+        message: "Valid staff authentication is required.",
+      });
+    }
+
+    // Generate today's ticket number using Sri Lankan local date.
     const queueDate = getQueueDate();
 
-    // Retry when another staff member requests the same ticket number.
+    // Retry if a duplicate ticket number is rejected by the database.
     for (let attempt = 0; attempt < 5; attempt++) {
-      const count = await WalkInTicket.countDocuments({ queueDate });
-      const ticketNumber = `W-${String(count + 1).padStart(3, "0")}`;
+      const ticketNumber =
+        await getNextWalkInTicketNumber(queueDate);
 
       try {
         const ticket = await WalkInTicket.create({
@@ -229,7 +288,9 @@ router.post("/", async (req, res) => {
           priority: selectedPriority,
           ticketNumber,
           queueDate,
-          createdBy: new mongoose.Types.ObjectId(req.staff.id),
+          createdBy: new mongoose.Types.ObjectId(
+            req.staff.id
+          ),
         });
 
         return res.status(201).json({
@@ -237,15 +298,25 @@ router.post("/", async (req, res) => {
           ticket,
         });
       } catch (error) {
-        if (error.code !== 11000) throw error;
+        // Retry only for duplicate-key errors.
+        // Other errors should be handled by the outer catch.
+        if (error.code === 11000) {
+          continue;
+        }
+
+        throw error;
       }
     }
 
     return res.status(409).json({
-      message: "Could not issue a ticket. Please try again.",
+      message:
+        "Could not issue a ticket. Please try registering again.",
     });
   } catch (error) {
-    console.error("Walk-in registration error:", error.message);
+    console.error(
+      "Walk-in registration error:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Could not register the walk-in visitor.",
@@ -257,6 +328,7 @@ router.post("/", async (req, res) => {
 router.patch("/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
+
     const validStatuses = [
       "Waiting",
       "Serving",
@@ -267,6 +339,12 @@ router.patch("/:id/status", async (req, res) => {
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         message: "Invalid queue status.",
+      });
+    }
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid ticket ID.",
       });
     }
 
@@ -287,7 +365,10 @@ router.patch("/:id/status", async (req, res) => {
       ticket,
     });
   } catch (error) {
-    console.error("Updating walk-in status:", error.message);
+    console.error(
+      "Updating walk-in status:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Could not update the queue status.",

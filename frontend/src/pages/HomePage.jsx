@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import "./HomePage.css";
+import heroImage from "../assets/Modern Immigration Appointment Center.png";
 
 const services = [
   {
@@ -102,31 +103,12 @@ export default function HomePage() {
             <span className="hero-side-rule" />
           </div>
 
-          <div className="hero-illustration" aria-hidden="true">
-            <div className="illustration-sun" />
-
-            <div className="illustration-building">
-              <div className="building-roof" />
-
-              <div className="building-top">
-                <span />
-                <span />
-                <span />
-              </div>
-
-              <div className="building-columns">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-
-              <div className="building-base" />
-            </div>
-
-            <div className="illustration-ground" />
-          </div>
-
+          <div className="hero-illustration hero-image">
+  <img
+    src={heroImage}
+    alt="Modern immigration appointment center"
+  />
+</div>
           <div className="hero-side-bottom">
             <span className="side-index">01 / 03</span>
             <div>
