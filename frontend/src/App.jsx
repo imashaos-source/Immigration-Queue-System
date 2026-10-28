@@ -9,6 +9,7 @@ import {
 import PublicLayout from "./components/PublicLayout";
 import HomePage from "./pages/HomePage";
 import BookingPage from "./pages/BookingPage";
+import AppointmentStatusPage from "./pages/AppointmentStatusPage";
 import StaffLoginPage from "./pages/StaffLoginPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import WalkInPage from "./pages/WalkInPage";
@@ -22,6 +23,10 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/book" element={<BookingPage />} />
+          <Route
+            path="/check-appointment"
+            element={<AppointmentStatusPage />}
+          />
         </Route>
 
         {/* Staff pages */}
@@ -35,14 +40,15 @@ export default function App() {
           element={<StaffDashboardPage />}
         />
 
+        {/* Walk-in and live queue pages */}
+        <Route path="/walk-in" element={<WalkInPage />} />
+        <Route path="/live-board" element={<LiveQueueBoard />} />
+
         {/* Unknown URLs return to the home page */}
         <Route
           path="*"
           element={<Navigate to="/" replace />}
         />
-
-        <Route path="/walk-in" element={<WalkInPage />} />
-        <Route path="/live-board" element={<LiveQueueBoard />} />
       </Routes>
     </BrowserRouter>
   );

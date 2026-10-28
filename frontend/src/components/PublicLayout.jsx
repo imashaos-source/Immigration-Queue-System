@@ -8,6 +8,7 @@ export default function PublicLayout() {
       <header className="public-header">
         <Link className="public-brand" to="/">
           <span className="public-brand-mark">IS</span>
+
           <span className="public-brand-copy">
             <strong>Immigration Services</strong>
             <small>Appointment &amp; Queue Management</small>
@@ -24,6 +25,10 @@ export default function PublicLayout() {
           <a href="/#process">How it works</a>
 
           <NavLink to="/book">Book appointment</NavLink>
+
+          <NavLink to="/check-appointment">
+            Check appointment
+          </NavLink>
 
           <NavLink to="/walk-in">Join queue</NavLink>
 
@@ -44,6 +49,7 @@ export default function PublicLayout() {
           <strong>Immigration Services</strong>
           <p>Appointment &amp; Queue Management System</p>
         </div>
+
         <span>Public portal · Development version</span>
       </footer>
     </div>
