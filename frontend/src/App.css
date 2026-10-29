@@ -1120,3 +1120,32 @@ body {
   min-width: 0;
   flex: 1 1 auto;
 }
+
+
+/* Clickable appointment-table sorting controls */
+.sortable-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.sortable-heading:hover,
+.sortable-heading:focus-visible {
+  color: var(--navy, #17304f);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sortable-heading span {
+  font-size: 12px;
+  opacity: 0.8;
+}

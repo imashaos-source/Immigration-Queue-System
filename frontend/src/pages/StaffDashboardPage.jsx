@@ -63,6 +63,10 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [sortConfig, setSortConfig] = useState({
+    key: "appointmentDate",
+    direction: "desc",
+  });
   const [selectedQueueDate, setSelectedQueueDate] = useState(() =>
     getSriLankanDate(new Date())
   );
@@ -385,28 +389,61 @@ function App() {
     }
   }
 
-  const filteredAppointments = appointments.filter((appointment) => {
-    const term = search.trim().toLowerCase();
+  const handleSort = (key) => {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  };
 
-    const searchableValues = [
-      appointment.applicantName,
-      appointment.email,
-      appointment.passportNumber,
-      appointment.serviceType,
-      appointment.queueNumber == null
-        ? ""
-        : String(appointment.queueNumber),
-    ];
+  const sortIndicator = (key) => {
+    if (sortConfig.key !== key) return "↕";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
+  };
 
-    const matchesSearch = searchableValues.some((value) =>
-      String(value ?? "").toLowerCase().includes(term)
-    );
+  const filteredAppointments = appointments
+    .filter((appointment) => {
+      const term = search.trim().toLowerCase();
 
-    const matchesStatus =
-      statusFilter === "All" || appointment.status === statusFilter;
+      const searchableValues = [
+        appointment.applicantName,
+        appointment.email,
+        appointment.passportNumber,
+        appointment.serviceType,
+        appointment.queueNumber == null
+          ? ""
+          : String(appointment.queueNumber),
+      ];
 
-    return matchesSearch && matchesStatus;
-  });
+      const matchesSearch = searchableValues.some((value) =>
+        String(value ?? "").toLowerCase().includes(term)
+      );
+
+      const matchesStatus =
+        statusFilter === "All" || appointment.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+
+      if (sortConfig.key === "appointmentDate") {
+        comparison =
+          new Date(a.appointmentDate).getTime() -
+          new Date(b.appointmentDate).getTime();
+      } else if (sortConfig.key === "queueNumber") {
+        const aNumber = a.queueNumber == null ? Number.POSITIVE_INFINITY : Number(a.queueNumber);
+        const bNumber = b.queueNumber == null ? Number.POSITIVE_INFINITY : Number(b.queueNumber);
+        comparison = aNumber - bNumber;
+      } else {
+        const aValue = String(a[sortConfig.key] ?? "").toLowerCase();
+        const bValue = String(b[sortConfig.key] ?? "").toLowerCase();
+        comparison = aValue.localeCompare(bValue);
+      }
+
+      return sortConfig.direction === "asc" ? comparison : -comparison;
+    });
 
   const today = getSriLankanDate(new Date());
 
@@ -822,11 +859,31 @@ function App() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Applicant</th>
-                    <th>Service</th>
-                    <th>Date</th>
-                    <th>Queue</th>
-                    <th>Status</th>
+                    <th aria-sort={sortConfig.key === "applicantName" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>
+                      <button className="sortable-heading" type="button" onClick={() => handleSort("applicantName")}>
+                        Applicant <span aria-hidden="true">{sortIndicator("applicantName")}</span>
+                      </button>
+                    </th>
+                    <th aria-sort={sortConfig.key === "serviceType" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>
+                      <button className="sortable-heading" type="button" onClick={() => handleSort("serviceType")}>
+                        Service <span aria-hidden="true">{sortIndicator("serviceType")}</span>
+                      </button>
+                    </th>
+                    <th aria-sort={sortConfig.key === "appointmentDate" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>
+                      <button className="sortable-heading" type="button" onClick={() => handleSort("appointmentDate")}>
+                        Date <span aria-hidden="true">{sortIndicator("appointmentDate")}</span>
+                      </button>
+                    </th>
+                    <th aria-sort={sortConfig.key === "queueNumber" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>
+                      <button className="sortable-heading" type="button" onClick={() => handleSort("queueNumber")}>
+                        Queue <span aria-hidden="true">{sortIndicator("queueNumber")}</span>
+                      </button>
+                    </th>
+                    <th aria-sort={sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>
+                      <button className="sortable-heading" type="button" onClick={() => handleSort("status")}>
+                        Status <span aria-hidden="true">{sortIndicator("status")}</span>
+                      </button>
+                    </th>
                     <th className="actions-heading">Actions</th>
                   </tr>
                 </thead>

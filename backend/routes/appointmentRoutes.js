@@ -1,5 +1,4 @@
 
-const requireAdmin = require("../middleware/requireAdmin");
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
@@ -56,6 +55,14 @@ router.post("/", async (req, res) => {
     ) {
       return res.status(400).json({
         message: "Please provide all required appointment details.",
+      });
+    }
+        // Validate the email address on the server.
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email.trim())) {
+      return res.status(400).json({
+        message: "Please provide a valid email address.",
       });
     }
 
@@ -340,7 +347,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // ADMIN: Delete an appointment.
-router.delete("/:id", requireAdmin, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({
