@@ -33,8 +33,8 @@ export default function PublicLayout() {
           <NavLink to="/live-board">Live board</NavLink>
 
           <Link to="/staff/login" className="staff-link">
-            Staff login
-          </Link>
+  Staff login
+</Link>
         </nav>
       </header>
 
