@@ -234,3 +234,52 @@
     text-align: left;
   }
 }
+
+/* Mobile navigation layout fix */
+@media (max-width: 520px) {
+  .public-header {
+    width: 100%;
+    min-width: 0;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px 12px;
+  }
+
+  .public-brand {
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .public-brand-copy {
+    min-width: 0;
+  }
+
+  .public-brand-copy strong,
+  .public-brand-copy small {
+    overflow-wrap: anywhere;
+  }
+
+  .public-nav {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .public-nav > a {
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .public-main {
+    min-width: 0;
+    width: 100%;
+  }
+}

@@ -911,3 +911,148 @@
   border-color: #e8dcc3;
   box-shadow: none;
 }
+
+/* Mobile responsiveness improvements */
+@media (max-width: 480px) {
+  .home-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .home-page .home-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 32px 18px;
+  }
+
+  .home-page .hero-content,
+  .home-page .hero-side {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .home-page .home-eyebrow {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    letter-spacing: 1.3px;
+  }
+
+  .home-page .hero-content h1 {
+    max-width: 100%;
+    font-size: clamp(34px, 9vw, 42px);
+    letter-spacing: -1.2px;
+    overflow-wrap: anywhere;
+  }
+
+  .home-page .hero-description {
+    max-width: 100%;
+    font-size: 14px;
+  }
+
+  .home-page .hero-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .home-page .hero-primary {
+    max-width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 15px;
+  }
+
+  .home-page .hero-secondary {
+    line-height: 1.6;
+  }
+
+  .home-page .hero-side {
+    min-height: 0;
+    padding: 15px;
+  }
+
+  .home-page .hero-side-label {
+    letter-spacing: 1px;
+  }
+
+  .home-page .hero-illustration {
+    min-height: 180px;
+  }
+
+  .home-page .hero-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: cover;
+  }
+
+  .home-page .hero-side-bottom {
+    gap: 12px;
+  }
+
+  .home-page .service-section,
+  .home-page .process-section {
+    padding: 38px 18px;
+  }
+
+  .home-page .home-cta {
+    margin: 18px;
+    padding: 20px;
+  }
+
+  .home-page .home-cta > a {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .home-page .demo-disclaimer {
+    padding: 0 18px 24px;
+  }
+}
+
+/* Prevent homepage buttons from overflowing on mobile */
+@media (max-width: 480px) {
+  .home-page .hero-primary {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 10px;
+  }
+
+  .home-page .hero-primary span {
+    flex-shrink: 0;
+  }
+
+  .home-page .hero-actions {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page .home-hero,
+  .home-page .hero-content,
+  .home-page .hero-actions {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .home-page .hero-primary {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+  }
+
+  .home-page .hero-primary span {
+    margin-left: auto;
+  }
+}
