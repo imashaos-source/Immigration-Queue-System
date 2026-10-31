@@ -90,7 +90,7 @@ cd Immigration-Queue-System
 
 ### 2. Configure the Backend
 
-Open a terminal in the project root and run:
+Open a terminal in the project root and navigate to the backend directory:
 
 ```bash
 cd backend
