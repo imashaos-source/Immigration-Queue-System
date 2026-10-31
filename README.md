@@ -1,4 +1,3 @@
-
 # Immigration Appointment & Queue Management System
 
 A web-based application developed for the **EE4207 Web Application Development Mini Project**. The system allows applicants to request immigration-related appointments and check their appointment status, while staff can manage appointments and walk-in queues.
@@ -16,14 +15,14 @@ A web-based application developed for the **EE4207 Web Application Development M
 ### Staff Portal
 - Authenticate staff users.
 - View and manage appointment records.
-- Search, filter and sort records where supported.
+- Search, filter and sort appointment records.
 - Edit and delete appointments.
 - Register walk-in applicants and generate queue tickets.
 - Update walk-in ticket statuses.
 
 ### Validation and Security
 - Client-side and server-side input validation.
-- Password hashing using bcrypt.
+- Password hashing using bcryptjs.
 - JWT-based authentication.
 - Role-based access control for protected operations.
 - Error handling for invalid requests.
@@ -34,28 +33,62 @@ A web-based application developed for the **EE4207 Web Application Development M
 - **Backend:** Node.js and Express.js
 - **Database:** MongoDB with Mongoose
 - **Authentication:** JSON Web Tokens (JWT)
-- **Password hashing:** bcryptjs
-- **Version control:** Git and GitHub
+- **Password Hashing:** bcryptjs
+- **Version Control:** Git and GitHub
+
+## Project Structure
+
+```text
+Immigration-Queue-System/
+│
+├── backend/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── .gitignore
+│   ├── package.json
+│   ├── package-lock.json
+│   └── server.js
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+├── .gitignore
+└── README.md
+```
 
 ## Prerequisites
 
 Install the following before running the application:
 
 - Node.js and npm
-- MongoDB, either a local instance or an accessible database service
+- MongoDB (local instance or an accessible database service)
 - Git
 - A modern web browser
 
 ## Installation and Setup
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/imashaos-source/Immigration-Queue-System.git
 cd Immigration-Queue-System
 ```
 
-### 2. Configure the backend
+### 2. Configure the Backend
 
 Open a terminal in the project root and run:
 
@@ -64,21 +97,23 @@ cd backend
 npm install
 ```
 
-Create a `.env` file inside the `backend/` directory.
-
-Configure the following variables:
+Create a `.env` file inside the `backend/` directory and configure the following environment variables:
 
 ```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secure_jwt_secret
+SETUP_SECRET=your_secure_setup_secret
 ```
 
-Configure the authentication secret using the environment variable name expected by the authentication implementation.
+**Environment Variables:**
 
-- `PORT` is optional. The backend defaults to port `5000`.
-- `MONGODB_URI` provides the MongoDB connection string and is required for the database connection.
+- `PORT` – Port number used by the backend server. Defaults to 5000 if not specified.
+- `MONGODB_URI` – MongoDB connection string used to connect to the database.
+- `JWT_SECRET` – Secret key used for JWT authentication.
+- `SETUP_SECRET` – Secret used for the initial administrator setup process.
 
-Replace the example database value with your own valid connection string.
+Replace the example values with your own configuration. Keep the `.env` file private and never commit it to GitHub.
 
 Start the backend in development mode:
 
@@ -86,17 +121,17 @@ Start the backend in development mode:
 npm run dev
 ```
 
-Alternatively, start it using Node.js:
+Alternatively, use:
 
 ```bash
 npm start
 ```
 
-Wait for the backend to connect to MongoDB successfully.
+Wait for the backend to connect successfully to MongoDB.
 
-### 3. Configure the frontend
+### 3. Configure the Frontend
 
-Open a second terminal and navigate to the project root, then run:
+Open a second terminal and navigate to the project root:
 
 ```bash
 cd frontend
@@ -111,45 +146,37 @@ Start the frontend development server:
 npm run dev
 ```
 
-Open the local URL printed in the terminal.
+Open the local URL displayed in the terminal.
 
-### 4. Build the frontend
+### 4. Build the Frontend
 
-To check whether the frontend can be built for production, run the following command from the `frontend/` directory:
+To create a production build, run the following command from the `frontend/` directory:
 
 ```bash
 npm run build
 ```
 
-The build output is generated in the `frontend/dist/` directory.
+The production build is generated in the `frontend/dist/` directory.
 
 ## Local Development URLs
 
-The application has been tested using these local development addresses:
+The application uses the following local development addresses:
 
 - **Frontend:** http://localhost:5173
 - **Backend:** http://localhost:5000
 
 The actual addresses may differ depending on the local configuration.
 
-## Project Structure
-
-The project contains separate frontend and backend applications.
-
-- `frontend/` — React user interface, pages, reusable components and styles.
-- `backend/` — Express server, API routes, data models, authentication and database integration.
-- `README.md` — Project overview and installation instructions.
-
 ## Database
 
-The application uses MongoDB for persistent storage.
+The application uses MongoDB for persistent data storage through Mongoose.
 
 The main models defined in the project include:
 
-- **Appointment:** Appointment request and booking information.
-- **Staff:** Staff account details, roles and password hashes.
-- **WalkInTicket:** Walk-in registration and queue ticket information.
-- **QueueCounter:** A model defined in the project; its role depends on the implemented queue logic.
+- **Appointment:** Stores appointment request and booking information.
+- **Staff:** Stores staff account details, roles and password hashes.
+- **WalkInTicket:** Stores walk-in registration and queue ticket information.
+- **QueueCounter:** Defines a database model for maintaining queue counter values. It is currently not integrated into the active queue-generation process.
 
 Refer to the project report for the database design and Entity-Relationship Diagram (ERD).
 
@@ -157,17 +184,17 @@ Refer to the project report for the database design and Entity-Relationship Diag
 
 - Passwords are hashed using bcryptjs.
 - JWT-based authentication is used for protected operations.
-- Access to staff functions is controlled by the implemented authorization rules.
+- Role-based access control is implemented for restricted staff functions.
 - Environment files containing database credentials or authentication secrets must not be committed to GitHub.
-- Use fictional test data for academic demonstrations.
+- Fictional test data is used for academic demonstrations.
 
 ## Author
 
 - **Student Name:** Suraweera M.G.I.O.
-- **Reg Number:** EG/2023/5909
+- **Registration Number:** EG/2023/5909
 - **Module:** EE4207 Web Application Development
 - **Project:** Immigration Appointment & Queue Management System
 
 ## Repository
 
-[Immigration Appointment & Queue Management System on GitHub](https://github.com/imashaos-source/Immigration-Queue-System)
+[Immigration Appointment & Queue Management System – GitHub](https://github.com/imashaos-source/Immigration-Queue-System)
